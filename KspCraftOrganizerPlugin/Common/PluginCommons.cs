@@ -1,32 +1,37 @@
 ﻿using System;
 using UnityEngine;
 
-namespace KspNalCommon {
+namespace KspNalCommon
+{
 
-	public interface CommonPluginProperties {
+    public interface CommonPluginProperties
+    {
 
-		bool canGetIsDebug();
+        bool canGetIsDebug();
 
-		string getPluginLogName();
+        string getPluginLogName();
 
-		string getPluginDirectory();
+        string getPluginDirectory();
 
-		bool isDebug();
+        bool isDebug();
 
-		GUISkin kspSkin();
+        bool replaceEditorLoadButton();
+        GUISkin kspSkin();
 
-		int getInitialWindowId();
-	}
+        int getInitialWindowId();
+    }
 
-	public static class PluginCommons {
+    public static class PluginCommons
+    {
 
-		public static CommonPluginProperties instance { get; private set;}
+        public static CommonPluginProperties instance { get; private set; }
 
-		public static void init(CommonPluginProperties properties) {
-			instance = properties;
-		}
+        public static void init(CommonPluginProperties properties)
+        {
+            instance = properties;
+        }
 
-}
+    }
 
 }
 

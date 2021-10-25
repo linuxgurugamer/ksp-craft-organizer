@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
-#if DEBUG
+#if false
 using KramaxReloadExtensions;
 #endif
 
-namespace KspNalCommon {
-	/**
+namespace KspNalCommon
+{
+    /**
 	 * To compile debug version KramaxPluginReload must be added conditionally.
 	 * To do so the .csproj file has to be edited by hand to have something like that:
 	 * 
@@ -17,12 +18,13 @@ namespace KspNalCommon {
 	  </ItemGroup>
 	 *
 	 */
-#if DEBUG
+#if false
 	public class MonoBehaviour2: ReloadableMonoBehaviour {
 #else
-	public class MonoBehaviour2: MonoBehaviour {
+    public class MonoBehaviour2 : MonoBehaviour
+    {
 #endif
 
-	}
+    }
 }
 

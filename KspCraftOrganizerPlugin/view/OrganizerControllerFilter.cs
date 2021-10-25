@@ -3,220 +3,284 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-namespace KspCraftOrganizer {
+namespace KspCraftOrganizer
+{
 
-	public class OrganizerControllerFilter {
-		
-		private SortedList<string, OrganizerTagEntity> _availableTags;
-		private SortedList<string, OrganizerTagEntity> _usedTags = new SortedList<string, OrganizerTagEntity>();
-		public FilterTagsGrouper usedTagsGrouper { get; private set; }
-		private OrganizerController parent;
-		bool availableTagsCreated = false;
+    public class OrganizerControllerFilter
+    {
 
-		public OrganizerControllerFilter(OrganizerController parent) {
-			this.parent = parent;
-			this.usedTagsGrouper = new FilterTagsGrouper(parent);
+        private SortedList<string, OrganizerTagEntity> _availableTags;
+        private SortedList<string, OrganizerTagEntity> _usedTags = new SortedList<string, OrganizerTagEntity>();
+        public FilterTagsGrouper usedTagsGrouper { get; private set; }
+        private OrganizerController parent;
+        bool availableTagsCreated = false;
 
-			_availableTags = new SortedList<string, OrganizerTagEntity>();
+        public OrganizerControllerFilter(OrganizerController parent)
+        {
+            this.parent = parent;
+            this.usedTagsGrouper = new FilterTagsGrouper(parent);
 
-			craftNameFilter = parent.stateManager.getCraftNameFilter();
-		}
+            _availableTags = new SortedList<string, OrganizerTagEntity>();
 
-		public void recreateAvailableTags() {
-			_availableTags.Clear();
-			foreach (string tagName in parent.stateManager.availableTagsForCurrentSave) {
-				addAvailableTag(tagName);
-			}
+            craftNameFilter = parent.stateManager.getCraftNameFilter();
+        }
 
-			foreach (OrganizerCraftEntity craft in parent.availableCrafts) {
-				foreach (string tag in craft.tags) {
-					addAvailableTag(tag);
-				}
-			}
-			parent.refreshDefaultTagsToAdd();
-			availableTagsCreated = true;
-		}
+        public void recreateAvailableTags()
+        {
+            _availableTags.Clear();
+            foreach (string tagName in parent.stateManager.availableTagsForCurrentSave)
+            {
+                addAvailableTag(tagName);
+            }
 
-		public void init() {
-			//
-		}
+            foreach (OrganizerCraftEntity craft in parent.availableCrafts)
+            {
+                foreach (string tag in craft.tags)
+                {
+                    addAvailableTag(tag);
+                }
+            }
+            parent.refreshDefaultTagsToAdd();
+            availableTagsCreated = true;
+        }
 
-		public bool restTagsCollapsed { get { return usedTagsGrouper.restGroupCollapsed; } set { usedTagsGrouper.restGroupCollapsed = value; } }
+        public void init()
+        {
+            //
+        }
 
-		public ICollection<string> groupsWithSelectedNoneOption {
-			get {
-				return usedTagsGrouper.groupsWithSelectedNoneOption;
-			}
-		}
+        public bool restTagsCollapsed { get { return usedTagsGrouper.restGroupCollapsed; } set { usedTagsGrouper.restGroupCollapsed = value; } }
 
-		public bool filterChanged { get; private set; }
+        public ICollection<string> groupsWithSelectedNoneOption
+        {
+            get
+            {
+                return usedTagsGrouper.groupsWithSelectedNoneOption;
+            }
+        }
 
-		public ICollection<OrganizerTagEntity> availableTags {
-			get {
-				return new ReadOnlyCollection<OrganizerTagEntity>(new List<OrganizerTagEntity>(_availableTags.Values));
-			}
-		}
+        public bool filterChanged { get; private set; }
 
-		public ICollection<string> availableTagsNames {
-			get {
-				return _availableTags.Keys;
-			}
-		}
+        public ICollection<OrganizerTagEntity> availableTags
+        {
+            get
+            {
+                return new ReadOnlyCollection<OrganizerTagEntity>(new List<OrganizerTagEntity>(_availableTags.Values));
+            }
+        }
 
-		public string craftNameFilter {
-			get {
-				return parent.stateManager.getCraftNameFilter();
-			}
-			set {
-				if (parent.stateManager.getCraftNameFilter() != value) {
-					parent.stateManager.setCraftNameFilter(value);
-					markFilterAsChanged();
-				}
-			}
-		}
+        public ICollection<string> availableTagsNames
+        {
+            get
+            {
+                return _availableTags.Keys;
+            }
+        }
 
-		public void markFilterAsChanged() {
-			filterChanged = true;
-		}
+        public string craftNameFilter
+        {
+            get
+            {
+                return parent.stateManager.getCraftNameFilter();
+            }
+            set
+            {
+                if (parent.stateManager.getCraftNameFilter() != value)
+                {
+                    parent.stateManager.setCraftNameFilter(value);
+                    markFilterAsChanged();
+                }
+            }
+        }
 
-
-		public void markFilterAsUpToDate() {
-			filterChanged = false;
-		}
-
-		public OrganizerControllerCraftList.CraftFilterPredicate createCraftFilterPredicate() {
-			string upperFilter = craftNameFilter.ToUpper();
-			return delegate (OrganizerCraftEntity craft, out bool shouldBeVisibleByDefault) {
-				return doesCraftPassFilter(upperFilter, craft, out shouldBeVisibleByDefault);
-			};
-		}
-
-		private bool doesCraftPassFilter(string upperFilter, OrganizerCraftEntity craft, out bool shouldBeVisibleByDefault) {
-			shouldBeVisibleByDefault = true;
-			bool pass = true;
-			pass = pass && (craft.nameToDisplay.ToUpper().Contains(upperFilter) || craftNameFilter == "");
-			pass = usedTagsGrouper.doesCraftPassFilter(craft, out shouldBeVisibleByDefault) && pass;
-			return pass;
-		}
+        public void markFilterAsChanged()
+        {
+            filterChanged = true;
+        }
 
 
-		public void clearFilters() {
-			craftNameFilter = "";
-			usedTagsGrouper.clearFilters();
-			foreach (OrganizerTagEntity tag in availableTags) {
-				tag.selectedForFiltering = false;
-				if (YesNoTag.isByDefaultNegativeTag(tag.name)) {
-					usedTagsGrouper.setGroupHasSelectedNoneFilter(tag.name, true);
-				}
-				if (YesNoTag.isByDefaultPositiveTag(tag.name)) {
-					tag.selectedForFiltering = true;
-				}
-			}
-		}
+        public void markFilterAsUpToDate()
+        {
+            filterChanged = false;
+        }
 
-		public void setGroupHasSelectedNoneFilter(string groupName, bool selectedNoneFilter) {
-			usedTagsGrouper.setGroupHasSelectedNoneFilter(groupName, selectedNoneFilter);
-		}
+        public OrganizerControllerCraftList.CraftFilterPredicate createCraftFilterPredicate()
+        {
+            string upperFilter = craftNameFilter.ToUpper();
+            return delegate (OrganizerCraftEntity craft, out bool shouldBeVisibleByDefault)
+            {
+                return doesCraftPassFilter(upperFilter, craft, out shouldBeVisibleByDefault);
+            };
+        }
 
-		public void update() {
-			if (!availableTagsCreated) {
-				recreateAvailableTags();
-			}
-			foreach (OrganizerTagEntity tag in _availableTags.Values) {
-				tag.countOfSelectedCraftsWithThisTag = 0;
-			}
-			foreach (OrganizerCraftEntity craft in parent.filteredCrafts) {
-				if (craft.isSelected) {
-					foreach (string tag in craft.tags) {
-						++_availableTags[tag].countOfSelectedCraftsWithThisTag;
-					}
-				}
-			}
-			foreach (OrganizerTagEntity tag in _availableTags.Values) {
-				tag.updateTagState();
-			}
-			updateUsedTags();
-			usedTagsGrouper.update(usedTags);
-		}
+        private bool doesCraftPassFilter(string upperFilter, OrganizerCraftEntity craft, out bool shouldBeVisibleByDefault)
+        {
+            shouldBeVisibleByDefault = true;
+            bool pass = true;
+            pass = pass && (craft.nameToDisplay.ToUpper().Contains(upperFilter) || craftNameFilter == "");
+            pass = usedTagsGrouper.doesCraftPassFilter(craft, out shouldBeVisibleByDefault) && pass;
+            return pass;
+        }
 
-		public ICollection<OrganizerTagEntity> usedTags {
-			get {
-				return new ReadOnlyCollection<OrganizerTagEntity>(_usedTags.Values);
-			}
-		}
 
-		public void updateUsedTags() {
-			_usedTags.Clear();
-			foreach (OrganizerCraftEntity craft in parent.availableCrafts) {
-				foreach (string tag in craft.tags) {
-					if (!_usedTags.ContainsKey(tag)) {
-						_usedTags.Add(tag, _availableTags[tag]);
-					}
-				}
-			}
+        public void clearFilters()
+        {
+            craftNameFilter = "";
+            usedTagsGrouper.clearFilters();
+            foreach (OrganizerTagEntity tag in availableTags)
+            {
+                tag.selectedForFiltering = false;
+                tag.NOT = false;
+                if (YesNoTag.isByDefaultNegativeTag(tag.name))
+                {
+                    usedTagsGrouper.setGroupHasSelectedNoneFilter(tag.name, true);
+                }
+                if (YesNoTag.isByDefaultPositiveTag(tag.name))
+                {
+                    tag.selectedForFiltering = true;
+                }
+            }
+        }
 
-			foreach (OrganizerTagEntity tag in availableTags) {
-				if (!_usedTags.ContainsKey(tag.name)) {
-					tag.selectedForFiltering = false;
-				}
-			}
-		}
+        public void setGroupHasSelectedNoneFilter(string groupName, bool selectedNoneFilter)
+        {
+            usedTagsGrouper.setGroupHasSelectedNoneFilter(groupName, selectedNoneFilter);
+        }
+        public void setGroupHasRequireAllFilter(string groupName, bool selectedNoneFilter)
+        {
+            usedTagsGrouper.setGroupHasRequireAllFilter(groupName, selectedNoneFilter);
+        }
 
-		public OrganizerTagEntity getTag(string tag) {
-			return _availableTags[tag];
-		}
+        public void update()
+        {
+            if (!availableTagsCreated)
+            {
+                recreateAvailableTags();
+            }
+            foreach (OrganizerTagEntity tag in _availableTags.Values)
+            {
+                tag.countOfSelectedCraftsWithThisTag = 0;
+            }
+            foreach (OrganizerCraftEntity craft in parent.filteredCrafts)
+            {
+                if (craft.isSelected)
+                {
+                    foreach (string tag in craft.tags)
+                    {
+                        ++_availableTags[tag].countOfSelectedCraftsWithThisTag;
+                    }
+                }
+            }
+            foreach (OrganizerTagEntity tag in _availableTags.Values)
+            {
+                tag.updateTagState();
+            }
+            updateUsedTags();
+            usedTagsGrouper.update(usedTags);
+        }
 
-		public bool doesTagExist(string tag) {
-			return _availableTags.ContainsKey(tag);
-		}
+        public ICollection<OrganizerTagEntity> usedTags
+        {
+            get
+            {
+                return new ReadOnlyCollection<OrganizerTagEntity>(_usedTags.Values);
+            }
+        }
 
-		public OrganizerTagEntity addAvailableTag(string newTag) {
-			if (!_availableTags.ContainsKey(newTag)) {
-				_availableTags.Add(newTag, new OrganizerTagEntity(parent, newTag));
-				parent.stateManager.addAvailableTag(newTag);
-			}
-			return _availableTags[newTag];
-		}
+        public void updateUsedTags()
+        {
+            _usedTags.Clear();
+            foreach (OrganizerCraftEntity craft in parent.availableCrafts)
+            {
+                foreach (string tag in craft.tags)
+                {
+                    if (!usedTags.Contains(_availableTags[tag]))
+                        _usedTags.Add(tag, _availableTags[tag]);
+                }
+            }
 
-		public void removeTag(string tag) {
-			if (_availableTags.ContainsKey(tag)) {
-				foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.SPH)) {
-					craft.removeTag(tag);
-				}
-				foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.VAB)) {
-					craft.removeTag(tag);
-				}
-				_availableTags.Remove(tag);
-				parent.stateManager.removeTag(tag);
-			}
-		}
+            foreach (OrganizerTagEntity tag in availableTags)
+            {
+                if (!_usedTags.ContainsKey(tag.name))
+                {
+                    tag.selectedForFiltering = false;
+                }
+            }
+        }
 
-		public void renameTag(string oldName, string newName) {
-			foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.SPH)) {
-				if (craft.containsTag(oldName)) {
-					craft.addTag(newName);
-					craft.removeTag(oldName);
-				}
-			}
-			foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.VAB)) {
-				if (craft.containsTag(oldName)) {
-					craft.addTag(newName);
-					craft.removeTag(oldName);
-				}
-			}
-			bool selectForFilterAfterInsertion = false;
-			if (_availableTags.ContainsKey(oldName)) {
-				selectForFilterAfterInsertion = _availableTags[oldName].selectedForFiltering;
-				_availableTags.Remove(oldName);
-			}
-			if (!_availableTags.ContainsKey(newName)) {
-				OrganizerTagEntity newTag = new OrganizerTagEntity(parent, newName);
-				newTag.selectedForFiltering = selectForFilterAfterInsertion;
-				_availableTags.Add(newName, newTag);
-			}
-			parent.stateManager.renameTag(oldName, newName);
-		}
+        public OrganizerTagEntity getTag(string tag)
+        {
+            return _availableTags[tag];
+        }
 
-	}
+        public bool doesTagExist(string tag)
+        {
+            return _availableTags.ContainsKey(tag);
+        }
+
+        public OrganizerTagEntity addAvailableTag(string newTag)
+        {
+            if (!_availableTags.ContainsKey(newTag))
+            {
+                _availableTags.Add(newTag, new OrganizerTagEntity(parent, newTag));
+                parent.stateManager.addAvailableTag(newTag);
+            }
+            return _availableTags[newTag];
+        }
+
+        public void removeTag(string tag)
+        {
+            if (_availableTags.ContainsKey(tag))
+            {
+                foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.SPH))
+                {
+                    craft.removeTag(tag);
+                }
+                foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.VAB))
+                {
+                    craft.removeTag(tag);
+                }
+                _availableTags.Remove(tag);
+                parent.stateManager.removeTag(tag);
+            }
+        }
+
+        public void renameTag(string oldName, string newName)
+        {
+            foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.SPH))
+            {
+                if (craft.containsTag(oldName))
+                {
+                    craft.addTag(newName);
+                    craft.removeTag(oldName);
+                }
+            }
+            foreach (OrganizerCraftEntity craft in parent.getCraftsOfType(CraftType.VAB))
+            {
+                if (craft.containsTag(oldName))
+                {
+                    craft.addTag(newName);
+                    craft.removeTag(oldName);
+                }
+            }
+            bool selectForFilterAfterInsertion = false;
+            bool NOTafterInsertion = false;
+            if (_availableTags.ContainsKey(oldName))
+            {
+                selectForFilterAfterInsertion = _availableTags[oldName].selectedForFiltering;
+                NOTafterInsertion = _availableTags[oldName].NOT;
+                _availableTags.Remove(oldName);
+            }
+            if (!_availableTags.ContainsKey(newName))
+            {
+                OrganizerTagEntity newTag = new OrganizerTagEntity(parent, newName);
+                newTag.selectedForFiltering = selectForFilterAfterInsertion;
+                newTag.NOT = NOTafterInsertion;
+                _availableTags.Add(newName, newTag);
+            }
+            parent.stateManager.renameTag(oldName, newName);
+        }
+
+    }
 }
 

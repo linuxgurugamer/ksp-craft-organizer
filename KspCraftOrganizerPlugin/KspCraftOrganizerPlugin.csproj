@@ -7,12 +7,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>KspCraftOrganizerPlugin</RootNamespace>
     <AssemblyName>KspCraftOrganizerPlugin</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile />
-    <KspPath Condition=" '$(KspPath)' == '' ">C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program-mod-dev</KspPath>
-    <KspDllPath Condition=" '$(KspDllPath)' == '' ">$(KspPath)\KSP_x64_Data\Managed</KspDllPath>
-    <KspPluginPath Condition=" '$(KspPluginPath)' == '' ">$(KspPath)\GameData</KspPluginPath>
-    <AssemblySearchPaths> $(KspPluginPath) ; $(KspDllPath) ; $(AssemblySearchPaths) </AssemblySearchPaths>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,14 +20,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <CustomCommands>
-      <CustomCommands>
-        <Command>
-          <type>AfterBuild</type>
-          <command>echo "${TargetFile}" "/Users/nal/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/GameData/KspCraftOrganizerPlugin/Plugins"</command>
-        </Command>
-      </CustomCommands>
     </CustomCommands>
-    <LangVersion>3</LangVersion>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -41,61 +30,49 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <LangVersion>4</LangVersion>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugWindows|AnyCPU'">
-    <OutputPath>bin\DebugWindows\</OutputPath>
-    <KspSystem>Windows</KspSystem>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseWindows|AnyCPU'">
-    <OutputPath>bin\ReleaseWindows\</OutputPath>
-    <KspSystem>Windows</KspSystem>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\Assembly*.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="$(KSPDIR)\KSP_x64_Data\Managed\UnityEngine*.dll">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ClickThroughBlocker">
+      <HintPath>$(KSPDIR)\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
+    </Reference>
+    <Reference Include="KSP_Log">
+      <HintPath>$(KSPDIR)\GameData\SpaceTuxLibrary\Plugins\KSP_Log.dll</HintPath>
+    </Reference>
+    <Reference Include="SpaceTuxUtility, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(KSPDIR)\GameData\SpaceTuxLibrary\Plugins\SpaceTuxUtility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-    </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule">
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-    </Reference>
-    <Reference Include="UnityEngine">
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-    </Reference>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Reference Include="KramaxReloadExtensions">
-    </Reference>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(Configuration)' == 'DebugWindows' ">
-    <Reference Include="KramaxReloadExtensions">
+    <Reference Include="ToolbarControl">
+      <HintPath>$(KSPDIR)\GameData\001_ToolbarControl\Plugins\ToolbarControl.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyVersion.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AssemblyVersion.tt</DependentUpon>
+    </Compile>
+    <Compile Include="InstallChecker.cs" />
     <Compile Include="KspCraftOrganizerVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisterToolbar.cs" />
+    <Compile Include="Services\DirectoryServices.cs" />
     <Compile Include="Services\EditorListenerService.cs" />
     <Compile Include="Services\FileLocationService.cs" />
     <Compile Include="Services\IKspAl.cs" />
     <Compile Include="Services\KspAlImpl.cs" />
     <Compile Include="Services\SettingsService.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TagsGrouper\CraftTagsGrouper.cs" />
     <Compile Include="TagsGrouper\FilterTagsGrouper.cs" />
     <Compile Include="TagsGrouper\ManagementTagsGrouper.cs" />
@@ -127,6 +104,42 @@
     <Compile Include="KspCraftOrganizerMain.cs" />
     <Compile Include="Services\CraftSortingHelper.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="AssemblyVersion.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AssemblyVersion.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(DevEnvDir)\texttransform.exe" "$(ProjectDir)AssemblyVersion.tt"
+</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>set KSPDIR=$(KSPDIR)
+
+IF "%25KSPDIR%25"=="" (
+
+	ECHO Configuration error - KSPDIR not specified in project.
+
+	ECHO Either set KSPDIR environment variable or edit BetterLoadSaveGame.Common.props
+
+	PAUSE
+
+	GOTO DONE
+
+)
+
+start /D $(SolutionDir) /WAIT deploy.bat  $(TargetDir) $(TargetFileName) $(TargetName)
+
+if $(ConfigurationName) == Release (	
+
+	start /D $(SolutionDir) /WAIT buildRelease.bat $(TargetDir) $(TargetFileName) $(TargetName)
+
+)
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -1,0 +1,19 @@
+Changelog
+
+1.7.0 (unreleased)
+	Adoption by Linuxgurugamer
+	Added ability to read/load from the Subassemblies folder
+	Added new default tags
+	Added AutoTag button, to auto tag Crewed, nonCrewed, & stock
+	Added Must have/Not have
+	Added a RequireAll option to each group
+	Resized window (made it smaller)
+	Moved all GUIStyle creations into RegisterToolbar.UpdateStyle(), this fixes memory leaks/unnecessary overhead where GUIStyles were being recreated every loop
+	Fixed tree view in tag window so +/- are not on separate lines
+	Reformatted all files using VisualStudio tools
+	Moved textures into PluginData to eliminate need for KSP to load them
+	Replaced texture loading method with method from ToolbarController
+
+TODO
+
+	Add way to move craft files into subdirectory ???

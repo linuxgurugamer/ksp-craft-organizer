@@ -4,143 +4,249 @@ using KSP.UI.Screens;
 using KspNalCommon;
 using System;
 using KSP.UI;
+using ToolbarControl_NS;
+using SpaceTuxUtility;
 
-namespace KspCraftOrganizer {
-	public class KspCraftOrganizerProperties : CommonPluginProperties {
-		public bool canGetIsDebug() {
-			return SettingsService.instance != null;
-		}
+using static KspCraftOrganizer.RegisterToolbar;
 
-		public int getInitialWindowId() {
-			return 4430924;
-		}
+namespace KspCraftOrganizer
+{
+    public class KspCraftOrganizerProperties : CommonPluginProperties
+    {
+        public bool canGetIsDebug()
+        {
+            return SettingsService.instance != null;
+        }
 
-		public string getPluginDirectory() {
-			return FileLocationService.instance.getThisPluginDirectory();
-		}
+        public int getInitialWindowId()
+        {
+            return WindowHelper.NextWindowId("KspCraftOrganizerProperties");
+        }
 
-		public string getPluginLogName() {
-			return "CraftOrganizer " + KspCraftOrganizerVersion.Version;
-		}
+        public string getPluginDirectory()
+        {
+            return FileLocationService.instance.getThisPluginDirectory();
+        }
 
-		public bool isDebug() {
-			return SettingsService.instance.getPluginSettings().debug;
-		}
+        public string getPluginLogName()
+        {
+            return "CraftOrganizer " + KspCraftOrganizerVersion.Version;
+        }
 
-		public GUISkin kspSkin() {
-			return IKspAlProvider.instance.kspSkin();
-		}
-	}
+        public bool isDebug()
+        {
+            return SettingsService.instance.getPluginSettings().debug;
+        }
 
-	[KSPAddon(KSPAddon.Startup.EditorAny, false)]
-	public class KspCraftOrganizerMain: MonoBehaviour2 {
-		private List<BaseWindow> windows = new List<BaseWindow>();
+        public bool replaceEditorLoadButton()
+        {
+            return SettingsService.instance.getPluginSettings().replace_editor_load_button;
+        }
+        public GUISkin kspSkin()
+        {
+            return IKspAlProvider.instance.kspSkin();
+        }
+    }
 
-		private OrganizerWindow craftOrganizerWindow;
-		private CurrentCraftTagsWindow manageThisCraftWindow;
+    [KSPAddon(KSPAddon.Startup.EditorAny, false)]
+    public class KspCraftOrganizerMain : MonoBehaviour2
+    {
+        private List<BaseWindow> windows = new List<BaseWindow>();
 
-		private List<ApplicationLauncherButton> appLauncherButtons = new List<ApplicationLauncherButton>();
+        static private OrganizerWindow craftOrganizerWindow;
+        private CurrentCraftTagsWindow manageThisCraftWindow;
 
-		private bool alreadyAfterCleanup = false;
+        //private List<ApplicationLauncherButton> appLauncherButtons = new List<ApplicationLauncherButton>();
 
-		public void Start() {
-			PluginCommons.init(new KspCraftOrganizerProperties());
+        private bool alreadyAfterCleanup = false;
 
-			PluginLogger.logDebug("Craft organizer plugin - start");
+        public void Start()
+        {
+            PluginCommons.init(new KspCraftOrganizerProperties());
 
-			IKspAlProvider.instance.start();
+            PluginLogger.logDebug("Craft organizer plugin - start");
 
-			CraftAlreadyExistsQuestionWindow craftAlreadyExistsQuestionWindow = addWindow(new CraftAlreadyExistsQuestionWindow());
-			ShouldCurrentCraftBeSavedQuestionWindow shouldCraftBeSavedQuestionWindow = addWindow(new ShouldCurrentCraftBeSavedQuestionWindow());
-			craftOrganizerWindow = addWindow(new OrganizerWindow(shouldCraftBeSavedQuestionWindow, craftAlreadyExistsQuestionWindow));
-			manageThisCraftWindow = addWindow(new CurrentCraftTagsWindow());
+            IKspAlProvider.instance.start();
 
-			addLauncherButtonInAllEditors(craftOrganizerWindow.displayWindow, "manage.png");
-			addLauncherButtonInAllEditors(manageThisCraftWindow.displayWindow, "tags.png");
+            CraftAlreadyExistsQuestionWindow craftAlreadyExistsQuestionWindow = addWindow(new CraftAlreadyExistsQuestionWindow());
+            ShouldCurrentCraftBeSavedQuestionWindow shouldCraftBeSavedQuestionWindow = addWindow(new ShouldCurrentCraftBeSavedQuestionWindow());
+            craftOrganizerWindow = addWindow(new OrganizerWindow(shouldCraftBeSavedQuestionWindow, craftAlreadyExistsQuestionWindow));
+            manageThisCraftWindow = addWindow(new CurrentCraftTagsWindow());
 
-			foreach (BaseWindow window in windows) {
-				window.start();
-			}
+            if (!PluginCommons.instance.replaceEditorLoadButton())
+            {
+                if (toolbarControl == null)
+                {
+                    toolbarControl = gameObject.AddComponent<ToolbarControl>();
+                    toolbarControl.AddToAllToolbars(ToggleDisplayWindow, null,
+                         ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH,
+                        MODID,
+                        "COButton",
+                        "KspCraftOrganizer/PluginData/" + "manage.png",
+                        "KspCraftOrganizer/PluginData/" + "manage.png",
+                        MODNAME
+                    );
 
-			EditorListenerService.instance.start();
+                }
+            }
+            else
+            {
+                //override existing actions on stock load button and replace with call to toggle CM's UI.
+                {
+                    UnityEngine.UI.Button.ButtonClickedEvent c = new UnityEngine.UI.Button.ButtonClickedEvent();
+                    c.AddListener(on_load_click);
+                    EditorLogic.fetch.loadBtn.onClick = c;
+                }
 
-			GameEvents.onGameSceneLoadRequested.Add(OnSceneLoadRequested);
+            }
 
-		}
+            if (toolbarControlTagManager == null)
+            {
+                toolbarControlTagManager = gameObject.AddComponent<ToolbarControl>();
 
-		public void OnSceneLoadRequested(GameScenes gs) {
-			PluginLogger.logDebug("OnSceneLoadRequested");
-			CleanUp();
-		}
+                toolbarControlTagManager.AddToAllToolbars(ToggleCraftTagWindow, null,
+                     ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH,
+                    MODID,
+                    "COBTagutton",
+                    "KspCraftOrganizer/PluginData/" + "tags.png",
+                    "KspCraftOrganizer/PluginData/" + "tags.png",
+                    MODTAGNAME
+                );
+            }
 
-		private void addLauncherButtonInAllEditors(Globals.Procedure callback, string textureFile) {
-			ApplicationLauncherButton button = null;
+            foreach (BaseWindow window in windows)
+            {
+                window.start();
+            }
 
-			Texture2D texture = UiUtils.loadIcon(textureFile);
+            EditorListenerService.instance.start();
 
-			button = ApplicationLauncher.Instance.AddModApplication(
-				delegate () {
-					button.SetFalse(false);
-					callback();
-				}, null, null, null, null, null,
-				ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, texture);
-			appLauncherButtons.Add(button);
+            GameEvents.onGameSceneLoadRequested.Add(OnSceneLoadRequested);
 
-		}
-
-		private T addWindow<T>(T newWindow) where T : BaseWindow  {
-			windows.Add(newWindow);
-			return newWindow;
-		}
+        }
 
 
+        void ToggleDisplayWindow()
+        {
+            craftOrganizerWindow.displayWindow();
+            toolbarControl.SetFalse();
+        }
+        void ToggleCraftTagWindow()
+        {
+            manageThisCraftWindow.displayWindow();
+            toolbarControlTagManager.SetFalse();
+        }
+        //Replace the default load action
+        private UnityEngine.Events.UnityAction on_load_click = new UnityEngine.Events.UnityAction(() =>
+        {
+            craftOrganizerWindow.displayWindow();
+        });
 
-		private void CleanUp() {
-			PluginLogger.logDebug("Craft organizer plugin - CleanUp in " + EditorDriver.editorFacility);
+        public void OnSceneLoadRequested(GameScenes gs)
+        {
+            PluginLogger.logDebug("OnSceneLoadRequested");
+            CleanUp();
+        }
 
-			GameEvents.onGameSceneLoadRequested.Remove(OnSceneLoadRequested);
-			EditorListenerService.instance.processOnEditorExit();
+        internal const string MODID = "CraftOrganizer";
+        internal const string MODNAME = "CraftOrganizer";
+        internal const string MODTAGNAME = "TagManager";
+        static internal ToolbarControl toolbarControl = null;
+        static internal ToolbarControl toolbarControlTagManager = null;
 
-			foreach (ApplicationLauncherButton button in appLauncherButtons) {
-				ApplicationLauncher.Instance.RemoveModApplication(button);
-			}
-			EditorListenerService.instance.destroy();
-			IKspAlProvider.instance.destroy();
+#if false
+        private void addLauncherButtonInAllEditors(Globals.Procedure callback, string textureFile)
+        {
+            ApplicationLauncherButton button = null;
 
-			alreadyAfterCleanup = true;
+            Texture2D texture = UiUtils.loadIcon(textureFile);
 
-		}
+            button = ApplicationLauncher.Instance.AddModApplication(
+                delegate ()
+                {
+                    button.SetFalse(false);
+                    callback();
+                }, null, null, null, null, null,
+                ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, texture);
+            appLauncherButtons.Add(button);
 
-		//
-		//Making cleanup in OnDestroy in not a good idea since ksp 1.2 because some global data no longer exist 
-		//when this event is fired, so we make cleanup in onGameSceneLoadRequested. We still need to handle OnDestroy
-		//in case plugin is reloaded using Kramax Plugin Reload.
-		//
-		public void OnDestroy() {
-			PluginLogger.logDebug("OnDestroy");
-			if (!alreadyAfterCleanup) {
-				CleanUp();
-			}
-		}
+        }
+#endif
 
-		public void Update() {
-			foreach (BaseWindow window in windows) {
-				window.update();
-			}
-		}
+        private T addWindow<T>(T newWindow) where T : BaseWindow
+        {
+            windows.Add(newWindow);
+            return newWindow;
+        }
 
-		public void OnGUI() {
-			//if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout) {
-			//	COLogger.Log(Event.current);
-			//}
-			foreach (BaseWindow window in windows) {
-				window.onGUI();
-			}
-		}
 
-		public void OnDisable() {
-			PluginLogger.logDebug("Craft organizer plugin - OnDisable in " + EditorDriver.editorFacility);
-		}
-	}
+
+        private void CleanUp()
+        {
+            PluginLogger.logDebug("Craft organizer plugin - CleanUp in " + EditorDriver.editorFacility);
+
+            GameEvents.onGameSceneLoadRequested.Remove(OnSceneLoadRequested);
+            EditorListenerService.instance.processOnEditorExit();
+#if false
+            foreach (ApplicationLauncherButton button in appLauncherButtons)
+            {
+                if (ApplicationLauncher.Instance != null)
+                    ApplicationLauncher.Instance.RemoveModApplication(button);
+            }
+#endif
+            if (toolbarControl != null)
+            {
+                toolbarControl.OnDestroy();
+                toolbarControl = null;
+            }
+            toolbarControlTagManager.OnDestroy();
+            toolbarControlTagManager = null;
+            EditorListenerService.instance.destroy();
+            IKspAlProvider.instance.destroy();
+
+            alreadyAfterCleanup = true;
+
+        }
+
+        //
+        //Making cleanup in OnDestroy in not a good idea since ksp 1.2 because some global data no longer exist 
+        //when this event is fired, so we make cleanup in onGameSceneLoadRequested. We still need to handle OnDestroy
+        //in case plugin is reloaded using Kramax Plugin Reload.
+        //
+        public void OnDestroy()
+        {
+            PluginLogger.logDebug("OnDestroy");
+            if (!alreadyAfterCleanup)
+            {
+                CleanUp();
+            }
+        }
+
+        public void Update()
+        {
+            foreach (BaseWindow window in windows)
+            {
+                window.update();
+            }
+        }
+
+        public void OnGUI()
+        {
+            //if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout) {
+            //	COLogger.Log(Event.current);
+            //}
+            RegisterToolbar.UpdateStyles(craftOrganizerWindow.guiStyleOption.id);
+
+            foreach (BaseWindow window in windows)
+            {
+                window.onGUI();
+            }
+        }
+
+        public void OnDisable()
+        {
+            PluginLogger.logDebug("Craft organizer plugin - OnDisable in " + EditorDriver.editorFacility);
+        }
+    }
 }
 

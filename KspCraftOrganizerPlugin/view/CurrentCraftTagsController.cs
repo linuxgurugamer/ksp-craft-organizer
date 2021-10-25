@@ -5,144 +5,173 @@ using KspNalCommon;
 
 namespace KspCraftOrganizer
 {
-	public class CurrentCraftTagEntity
-	{
+    public class CurrentCraftTagEntity
+    {
 
-		public string name { get; set; }
+        public string name { get; set; }
 
-		public bool selected { get; set;  } 				//is currently selected
+        public bool selected { get; set; }              //is currently selected
 
-		public bool selectedDuringLastEdit { get; set; }    //used to remove selection if user clicks cancel
+        public bool selectedDuringLastEdit { get; set; }    //used to remove selection if user clicks cancel
 
-		public bool selectedOriginally { get; set; } 		//used to tell if file id dirty
+        public bool selectedOriginally { get; set; }        //used to tell if file id dirty
 
-	}
+    }
 
-	public class CurrentCraftTagsController
-	{
-		public static CurrentCraftTagsController instance = new CurrentCraftTagsController();
-		
-		private SettingsService settingsService = SettingsService.instance;
-		private EditorListenerService craftListenerService = EditorListenerService.instance;
-		private FileLocationService fileLocationService = FileLocationService.instance;
-		private IKspAl ksp = IKspAlProvider.instance;
+    public class CurrentCraftTagsController
+    {
+        public static CurrentCraftTagsController instance = new CurrentCraftTagsController();
 
-		private SortedDictionary<string, CurrentCraftTagEntity> _availableTagsCache;
+        private SettingsService settingsService = SettingsService.instance;
+        private EditorListenerService craftListenerService = EditorListenerService.instance;
+        private FileLocationService fileLocationService = FileLocationService.instance;
+        private IKspAl ksp = IKspAlProvider.instance;
 
-		public CurrentCraftTagsController() {
-			craftListenerService.onEditorStarted += delegate () {
-				_availableTagsCache = null;
-			};
-			craftListenerService.onShipLoaded += delegate (string fileName) {
-				_availableTagsCache = null;
-			};
+        private SortedDictionary<string, CurrentCraftTagEntity> _availableTagsCache;
 
-			craftListenerService.onShipSaved += delegate (string craftFile, bool craftSavedToNewFile) {
-				saveTagsToCraftIfNeeded(craftFile, craftSavedToNewFile);
-			};
-		}
+        public CurrentCraftTagsController()
+        {
+            craftListenerService.onEditorStarted += delegate ()
+            {
+                _availableTagsCache = null;
+            };
+            craftListenerService.onShipLoaded += delegate (string fileName)
+            {
+                _availableTagsCache = null;
+            };
 
-		public void clearCache()
-		{
-			_availableTagsCache = null;
-		}
-		
-		public void resetToLastlyEditied() {
-			foreach (CurrentCraftTagEntity tagModel in availableTags) {
-				tagModel.selected = tagModel.selectedDuringLastEdit;
-			}
-		}
+            craftListenerService.onShipSaved += delegate (string craftFile, bool craftSavedToNewFile)
+            {
+                saveTagsToCraftIfNeeded(craftFile, craftSavedToNewFile);
+            };
+        }
 
-		public void saveIfPossible() {
-			if (craftListenerService.canAutoSaveSomethingToDisk()) {
-				saveTagsToCraftIfNeeded(craftListenerService.currentShipFile, false);
-			}
-			foreach (CurrentCraftTagEntity tag in availableTags) {
-				tag.selectedDuringLastEdit = tag.selected;
-			}
-		}
+        public void clearCache()
+        {
+            _availableTagsCache = null;
+        }
 
-		internal void userAddAvailableTag(string newTagText) {
-			ensureTagsCacheLoaded();
-			if (!_availableTagsCache.ContainsKey(newTagText)) {
-				settingsService.addAvailableTag(ksp.getNameOfSaveFolder(), newTagText);
-				addTagIfNeeded(newTagText);
-			}
-		}
+        public void resetToLastlyEditied()
+        {
+            foreach (CurrentCraftTagEntity tagModel in availableTags)
+            {
+                tagModel.selected = tagModel.selectedDuringLastEdit;
+            }
+        }
 
-		private void saveTagsToCraftIfNeeded(string craftFile, bool craftSavedToNewFile) {
-			if (isDirty() || craftSavedToNewFile) {
-				PluginLogger.logDebug("Writing craft settings from craft management window");
+        public void saveIfPossible()
+        {
+            if (craftListenerService.canAutoSaveSomethingToDisk())
+            {
+                saveTagsToCraftIfNeeded(craftListenerService.currentShipFile, false);
+            }
+            foreach (CurrentCraftTagEntity tag in availableTags)
+            {
+                tag.selectedDuringLastEdit = tag.selected;
+            }
+        }
 
-				CraftSettingsDto dto = new CraftSettingsDto();
+        internal void userAddAvailableTag(string newTagText)
+        {
+            ensureTagsCacheLoaded();
+            if (!_availableTagsCache.ContainsKey(newTagText))
+            {
+                settingsService.addAvailableTag(ksp.getNameOfSaveFolder(), newTagText);
+                addTagIfNeeded(newTagText);
+            }
+        }
 
-				List<string> selectedTags = new List<string>();
-				foreach (CurrentCraftTagEntity tag in availableTags) {
-					if (tag.selected) {
-						selectedTags.Add(tag.name);
-					}
-					tag.selectedDuringLastEdit = tag.selected;
-				}
-				dto.craftName = ksp.getCurrentCraftName();
-				dto.tags = selectedTags.ToArray();
-				PluginLogger.logDebug("Selected tags that will be saved: " + Globals.join(dto.tags, ", "));
+        private void saveTagsToCraftIfNeeded(string craftFile, bool craftSavedToNewFile)
+        {
+            if (isDirty() || craftSavedToNewFile)
+            {
+                PluginLogger.logDebug("Writing craft settings from craft management window");
 
-				settingsService.writeCraftSettingsForCraftFile(fileLocationService.getCraftSettingsFileForCraftFile(craftFile), dto);
-			}
-			_availableTagsCache = null;
-		}
+                CraftSettingsDto dto = new CraftSettingsDto();
 
-		private bool isDirty() {
-			if (_availableTagsCache != null) {
-				foreach (CurrentCraftTagEntity tag in availableTags) {
-					if (tag.selected != tag.selectedOriginally) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+                List<string> selectedTags = new List<string>();
+                foreach (CurrentCraftTagEntity tag in availableTags)
+                {
+                    if (tag.selected)
+                    {
+                        selectedTags.Add(tag.name);
+                    }
+                    tag.selectedDuringLastEdit = tag.selected;
+                }
+                dto.craftName = ksp.getCurrentCraftName();
+                dto.tags = selectedTags.ToArray();
+                PluginLogger.logDebug("Selected tags that will be saved: " + Globals.join(dto.tags, ", "));
 
-		public ICollection<CurrentCraftTagEntity> availableTags
-		{
-			get {
-				ensureTagsCacheLoaded();
-				return _availableTagsCache.Values;
-			}
-		}
+                settingsService.writeCraftSettingsForCraftFile(fileLocationService.getCraftSettingsFileForCraftFile(craftFile), dto);
+            }
+            _availableTagsCache = null;
+        }
 
-		private void ensureTagsCacheLoaded() {
-			if (_availableTagsCache == null) {
-				_availableTagsCache = new SortedDictionary<string, CurrentCraftTagEntity>();
-				foreach (string tag in settingsService.readProfileSettings(ksp.getNameOfSaveFolder()).availableTags) {
-					addTagIfNeeded(tag);
-				}
+        private bool isDirty()
+        {
+            if (_availableTagsCache != null)
+            {
+                foreach (CurrentCraftTagEntity tag in availableTags)
+                {
+                    if (tag.selected != tag.selectedOriginally)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
-				PluginLogger.logDebug("Reading current's craft tags assuming its file is " + craftListenerService.originalShipFile);
-				if (!craftListenerService.isNewEditor() && File.Exists(craftListenerService.originalShipFile)) {
-					ICollection<string> tags = settingsService.readCraftSettingsForCraftFile(craftListenerService.originalShipFile).tags;
-					foreach (string tag in tags) {
-						addTagIfNeeded(tag);
-						_availableTagsCache[tag].selectedDuringLastEdit = true;
-						_availableTagsCache[tag].selectedOriginally = true;
-						_availableTagsCache[tag].selected = true;
-					}
-					PluginLogger.logDebug("Tags from file " + Globals.join(tags, ", "));
-				} else {
-					PluginLogger.logDebug("Tags will not be read - editor is new or file '" + craftListenerService.originalShipFile + "' does not exist");
-				}
+        public ICollection<CurrentCraftTagEntity> availableTags
+        {
+            get
+            {
+                ensureTagsCacheLoaded();
+                return _availableTagsCache.Values;
+            }
+        }
 
-			}
-		}
+        private void ensureTagsCacheLoaded()
+        {
+            if (_availableTagsCache == null)
+            {
+                _availableTagsCache = new SortedDictionary<string, CurrentCraftTagEntity>();
+                foreach (string tag in settingsService.readProfileSettings(ksp.getNameOfSaveFolder()).availableTags)
+                {
+                    addTagIfNeeded(tag);
+                }
 
-		private void addTagIfNeeded(string tag) {
-			if (!_availableTagsCache.ContainsKey(tag)) {
-				CurrentCraftTagEntity newTag = new CurrentCraftTagEntity();
-				newTag.name = tag;
-				_availableTagsCache.Add(tag, newTag);
-			}
-		}
+                PluginLogger.logDebug("Reading current's craft tags assuming its file is " + craftListenerService.originalShipFile);
+                if (!craftListenerService.isNewEditor() && File.Exists(craftListenerService.originalShipFile))
+                {
+                    ICollection<string> tags = settingsService.readCraftSettingsForCraftFile(craftListenerService.originalShipFile).tags;
+                    foreach (string tag in tags)
+                    {
+                        addTagIfNeeded(tag);
+                        _availableTagsCache[tag].selectedDuringLastEdit = true;
+                        _availableTagsCache[tag].selectedOriginally = true;
+                        _availableTagsCache[tag].selected = true;
+                    }
+                    PluginLogger.logDebug("Tags from file " + Globals.join(tags, ", "));
+                }
+                else
+                {
+                    PluginLogger.logDebug("Tags will not be read - editor is new or file '" + craftListenerService.originalShipFile + "' does not exist");
+                }
 
-	}
+            }
+        }
+
+        private void addTagIfNeeded(string tag)
+        {
+            if (!_availableTagsCache.ContainsKey(tag))
+            {
+                CurrentCraftTagEntity newTag = new CurrentCraftTagEntity();
+                newTag.name = tag;
+                _availableTagsCache.Add(tag, newTag);
+            }
+        }
+
+    }
 }
 
