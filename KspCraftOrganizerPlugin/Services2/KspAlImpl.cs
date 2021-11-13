@@ -5,6 +5,8 @@ using System.IO;
 using System.Security.Cryptography;
 using KspNalCommon;
 using UniLinq;
+using static KspCraftOrganizer.RegisterToolbar;
+
 
 namespace KspCraftOrganizer
 {
@@ -137,7 +139,7 @@ namespace KspCraftOrganizer
 
         public bool isShowStockCrafts()
         {
-            return HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels;
+            return /*HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels || */ SettingsService.instance.getPluginSettings().allowStockVessels;
         }
 
         public CraftType getCurrentEditorFacilityType()
@@ -162,6 +164,7 @@ namespace KspCraftOrganizer
             System.Random r = new System.Random(craftFile.GetHashCode());
             CraftDaoDto toRet = new CraftDaoDto();
             toRet.name = Path.GetFileNameWithoutExtension(craftFile);
+
             toRet.cost = r.Next() % 100000000;
             toRet.mass = r.Next() % 100000000;
             toRet.partCount = r.Next() % 10000;
@@ -216,6 +219,7 @@ namespace KspCraftOrganizer
             partNames = partNames.Distinct().ToList();
 
             toRet.name = guardedGetStringValue(nodes, "ship", craftFile);
+            toRet.kspVersion = guardedGetStringValue(nodes, "version", craftFile);
             toRet.description = guardedGetStringValue(nodes, "description", craftFile);
             toRet.stagesCount = stagesCount;
             toRet.partCount = parts.Length;
@@ -254,13 +258,15 @@ namespace KspCraftOrganizer
             }
         }
 
+        const string CACHE_VERSION = "3";
         private ConfigNode craftDaoDtoToCacheNode(CraftDaoDto craftDaoDto, List<string> partNames, string fileChecksum)
         {
             ConfigNode toRet = new ConfigNode();
 
             toRet.AddValue("origChecksum", fileChecksum);
-            toRet.AddValue("cacheVersion", "2");
+            toRet.AddValue("cacheVersion", CACHE_VERSION);
             toRet.AddValue("name", craftDaoDto.name);
+            toRet.AddValue("kspVersion", craftDaoDto.kspVersion);
             toRet.AddValue("stagesCount", craftDaoDto.stagesCount);
             toRet.AddValue("cost", craftDaoDto.cost);
             toRet.AddValue("partCount", craftDaoDto.partCount);
@@ -280,7 +286,7 @@ namespace KspCraftOrganizer
             }
 
             string cacheVersion = cacheConfigNode.GetValue("cacheVersion");
-            if (cacheVersion != "2")
+            if (cacheVersion != CACHE_VERSION)
             {
                 return null;
             }
@@ -292,6 +298,7 @@ namespace KspCraftOrganizer
 
             CraftDaoDto toRet = new CraftDaoDto();
             toRet.name = maybeLocalize(cacheConfigNode.GetValue("name"));
+            toRet.kspVersion = cacheConfigNode.GetValue("kspVersion");
             toRet.stagesCount = int.Parse(cacheConfigNode.GetValue("stagesCount"));
             toRet.cost = float.Parse(cacheConfigNode.GetValue("cost"));
             toRet.partCount = int.Parse(cacheConfigNode.GetValue("partCount"));
@@ -793,6 +800,8 @@ namespace KspCraftOrganizer
             PluginSettings toRet = new PluginSettings();
             toRet.debug = false;
             toRet.replace_editor_load_button = true;
+            toRet.showVersion = false;
+            toRet.allowStockVessels = HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels;
 
             List<string> defaultAvailableTags = new List<string>();
             toRet.defaultAvailableTags = defaultAvailableTags;
@@ -830,6 +839,8 @@ namespace KspCraftOrganizer
                 }
                 toRet.debug = readBoolFromSettings(settings, "debug", false);
                 toRet.replace_editor_load_button = readBoolFromSettings(settings, "replace_editor_load_button", true);
+                toRet.showVersion = readBoolFromSettings(settings, "showVersion", true);
+                toRet.allowStockVessels = readBoolFromSettings(settings, "allowStockVessels", HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels);
             }
 
             if (settingsChanged)
@@ -907,7 +918,8 @@ namespace KspCraftOrganizer
 
             settingsToWrite.AddValue("debug", settings.debug);
             settingsToWrite.AddValue("replace_editor_load_button", settings.replace_editor_load_button);
-
+            settingsToWrite.AddValue("showVersion", settings.showVersion);
+            settingsToWrite.AddValue("allowStockVessels", settings.allowStockVessels);
             settingsToWrite.Save(fileName);
         }
 

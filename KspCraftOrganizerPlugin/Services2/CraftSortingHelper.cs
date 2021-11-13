@@ -26,6 +26,7 @@ namespace KspCraftOrganizer
         static CraftSortFunctionFactory()
         {
             addSingletonFunction(CraftSortFunction.SORT_CRAFTS_BY_NAME);
+            addSingletonFunction(CraftSortFunction.SORT_CRAFTS_BY_CREW_CAPACITY);
             addSingletonFunction(CraftSortFunction.SORT_CRAFTS_BY_MASS);
             addSingletonFunction(CraftSortFunction.SORT_CRAFTS_BY_COST);
             addSingletonFunction(CraftSortFunction.SORT_CRAFTS_BY_STAGES);
@@ -65,6 +66,7 @@ namespace KspCraftOrganizer
         public static readonly string SORT_ID_BY_DATE = "byDate";
 
         public static readonly string SORT_ID_BY_TAG = "ByTag";
+        public static readonly string SORT_ID_BY_CREW_CAPACITY = "byCrewCapacity";
 
         public static CraftSortFunction SORT_CRAFTS_BY_NAME = new CraftSortFunction(SORT_ID_BY_NAME, (c1, c2) =>
         {
@@ -75,6 +77,7 @@ namespace KspCraftOrganizer
             }
             return craftComparisonResult;
         });
+
         public static CraftSortFunction SORT_DIRS_BY_NAME = new CraftSortFunction(SORT_ID_BY_NAME, (c1, c2) =>
         {
             int craftComparisonResult = -c1.isAutosaved.CompareTo(c2.isAutosaved);
@@ -110,6 +113,12 @@ namespace KspCraftOrganizer
             }
             return maxDigits;
         }
+
+        public static CraftSortFunction SORT_CRAFTS_BY_CREW_CAPACITY = new CraftSortFunction(SORT_ID_BY_CREW_CAPACITY, (c1, c2) =>
+        {
+            int craftComparisonResult = c1.crewCapacity.CompareTo(c2.crewCapacity);
+            return craftComparisonResult;
+        });
 
         public static CraftSortFunction SORT_CRAFTS_BY_PARTS_COUNT = new CraftSortFunction(SORT_ID_BY_PARTS_COUNT, (c1, c2) =>
         {

@@ -46,6 +46,10 @@ namespace KspCraftOrganizer
             this.filter.init();
         }
 
+        public void ClearCraftList()
+        {
+            craftList.ClearListOfCrafts();
+        }
         public void refreshDefaultTagsToAdd()
         {
             defaultTagsNotToAdd = new List<string>();

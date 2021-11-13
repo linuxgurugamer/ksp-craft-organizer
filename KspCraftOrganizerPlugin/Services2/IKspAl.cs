@@ -9,6 +9,7 @@ namespace KspCraftOrganizer
     public class CraftDaoDto
     {
         public string name { get; set; }
+        public string kspVersion { get; set; }
         public int stagesCount { get; set; }
         public float cost { get; set; }
         public int partCount { get; set; }
@@ -23,6 +24,8 @@ namespace KspCraftOrganizer
     {
         public bool debug;
         public bool replace_editor_load_button;
+        public bool showVersion;
+        public bool allowStockVessels;
         public ICollection<string> defaultAvailableTags { get; set; }
     }
 

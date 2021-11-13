@@ -1,6 +1,6 @@
 Changelog
 
-1.7.0 (unreleased)
+1.7.0 
 	Adoption by Linuxgurugamer
 	Added ability to read/load from the Subassemblies folder
 	Added new default tags
@@ -14,6 +14,20 @@ Changelog
 	Moved textures into PluginData to eliminate need for KSP to load them
 	Replaced texture loading method with method from ToolbarController
 
+	Fixed multiple directories with same name but different case (works on Linux/Mac, not so well on Windows.  Specifically, Views/views now all in Views2, Services/services now in Services2)
+
+1.7.0.1
+	Add sort by  Crew Capacity
+	Fixed second settings window from being opened if one is already open
+	Adjusted size of settings window if using KSP skin
+	Add display ksp version
+	Added toggle to show KSP version 
+	Added toggle to show stock files (stock setting is used initially)
+
 TODO
 
 	Add way to move craft files into subdirectory ???
+	add way to save craft in different save/directory
+
+	Include/exclude stock
+	

@@ -318,7 +318,10 @@ namespace KspCraftOrganizer
                     }
                     drawScaledLabel(craft.cost > model.availableFunds && model.availableFunds >= 0 ? parent.warningLabelStyle : RegisterToolbar.goodLabelStyle, costPosX, nextTop, costMaxWidth, thisShipRect, "Cost: " + craft.costToDisplay);
                     nextTop += 20;
-                    drawLabel(parent.skin.label, firstRowsLeftOffset, nextTop, "Last modification time: " + craft.lastWriteTime.ToString("yyyy/MM/dd HH:mm:ss"));
+                    string ver = "";
+                    if (SettingsService.instance.getPluginSettings().showVersion)
+                        ver = "      KSP version: " + craft.kspVersion;
+                    drawLabel(parent.skin.label, firstRowsLeftOffset, nextTop, "Last modification time: " + craft.lastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")+ ver);
                     nextTop += 20;
                     if (!craft.allPartsAvailable)
                     {

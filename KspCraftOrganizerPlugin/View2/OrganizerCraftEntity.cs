@@ -186,6 +186,7 @@ namespace KspCraftOrganizer
 
         public int partCount { get { return craftDto.partCount; } }
 
+        public string kspVersion {  get { return craftDto.kspVersion; } }
         public int crewCapacity { get { return craftDto.crewCapacity; } }
         public float mass { get { return craftDto.mass; } }
 

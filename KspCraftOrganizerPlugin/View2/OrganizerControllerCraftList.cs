@@ -4,21 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using KspNalCommon;
 
-using static KspCraftOrganizer.RegisterToolbar;
-
 namespace KspCraftOrganizer
 {
 
     public class ListOfCraftsInSave
     {
 
-        private string saveName;
+        private readonly string saveName;
         static private FileLocationService fileLocationService = FileLocationService.instance;
 
-        private OrganizerController parent;
-        private SettingsService settingsService = SettingsService.instance;
-        private IKspAl ksp = IKspAlProvider.instance;
-        private Dictionary<CraftType, List<OrganizerCraftEntity>> craftTypeToAvailableCraftsLazy = new Dictionary<CraftType, List<OrganizerCraftEntity>>();
+        private readonly OrganizerController parent;
+        private readonly SettingsService settingsService = SettingsService.instance;
+        private readonly IKspAl ksp = IKspAlProvider.instance;
+        private readonly Dictionary<CraftType, List<OrganizerCraftEntity>> craftTypeToAvailableCraftsLazy = new Dictionary<CraftType, List<OrganizerCraftEntity>>();
 
 
 
@@ -162,13 +160,18 @@ namespace KspCraftOrganizer
         private OrganizerCraftEntity _primaryCraft;
         private int cachedSelectedCraftsCount;
         private CraftType _craftType;
-        private Dictionary<string, ListOfCraftsInSave> saveToListOfCrafts = new Dictionary<string, ListOfCraftsInSave>();
-        private CraftSortingHelper sortingHelper;
+        private readonly Dictionary<string, ListOfCraftsInSave> saveToListOfCrafts = new Dictionary<string, ListOfCraftsInSave>();
+        private readonly CraftSortingHelper sortingHelper;
 
-        private IKspAl ksp = IKspAlProvider.instance;
-        private FileLocationService fileLocationService = FileLocationService.instance;
-        private OrganizerController parent;
+        private readonly IKspAl ksp = IKspAlProvider.instance;
+        private readonly FileLocationService fileLocationService = FileLocationService.instance;
+        private readonly OrganizerController parent;
 
+        public void ClearListOfCrafts()
+        {
+            cachedFilteredCrafts = null;
+            saveToListOfCrafts.Clear();
+        }
         private string currentSave { get { return parent.currentSave; } }
 
         public OrganizerControllerCraftList(OrganizerController parent)

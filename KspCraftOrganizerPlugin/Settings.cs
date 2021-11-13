@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using SpaceTuxUtility;
+using ClickThroughFix;
 
 namespace KspCraftOrganizer
 {
@@ -12,7 +13,7 @@ namespace KspCraftOrganizer
         internal static Settings instance = null;
 
         const int WIDTH = 300;
-        const int HEIGHT = 100;
+        const int HEIGHT = 150;
         Rect win;
         int _windowId;
         void Start()
@@ -27,7 +28,7 @@ namespace KspCraftOrganizer
             {
                 GUI.skin = KspNalCommon.PluginCommons.instance.kspSkin();
                 win.width = 250;
-                win.height = 100;
+                win.height = 125;
             }
             else
             {
@@ -37,7 +38,7 @@ namespace KspCraftOrganizer
             }
 
 
-            win = GUILayout.Window(12345, win, DoWin, "Settings");
+            win =ClickThruBlocker.GUILayoutWindow(12345, win, DoWin, "Settings");
         }
 
         void DoWin(int id)

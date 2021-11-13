@@ -134,8 +134,10 @@ namespace KspCraftOrganizer
                     reload = false;
                     lastCraftTypeSet = true;
                 }
+
                 List<CraftSortData> sortingFields = new List<CraftSortData>(new CraftSortData[] {
                     new CraftSortData("name", CraftSortFunction.SORT_CRAFTS_BY_NAME),
+                    new CraftSortData("crew", CraftSortFunction.SORT_CRAFTS_BY_CREW_CAPACITY),
                     new CraftSortData("parts", CraftSortFunction.SORT_CRAFTS_BY_PARTS_COUNT),
                     new CraftSortData("mass", CraftSortFunction.SORT_CRAFTS_BY_MASS),
                     new CraftSortData("stages", CraftSortFunction.SORT_CRAFTS_BY_STAGES),
@@ -183,8 +185,11 @@ namespace KspCraftOrganizer
         {
             if (GUI.Button(new Rect(2, 2, 20, 20), RegisterToolbar.settingsTextureBtn, settingsBtnStyle))
             {
-                GameObject go = new GameObject();
-                var w = go.AddComponent<Settings>();
+                if (Settings.instance == null)
+                {
+                    GameObject go = new GameObject();
+                    var w = go.AddComponent<Settings>();
+                }
             }
 
             drawStartOverlays();
@@ -369,6 +374,20 @@ namespace KspCraftOrganizer
                 using (new GUILayout.VerticalScope(GUILayout.ExpandWidth(false)))
                 {
                     var width = FILTER_TOOLBAR_WIDTH - 10 - skin.verticalScrollbar.CalcScreenSize(skin.verticalScrollbar.CalcSize(new GUIContent(""))).x;
+
+                    bool oAllowStockVessels = SettingsService.instance.getPluginSettings().allowStockVessels;
+                    bool oShowVersion = SettingsService.instance.getPluginSettings().showVersion;
+                    SettingsService.instance.getPluginSettings().showVersion = GUILayout.Toggle(SettingsService.instance.getPluginSettings().showVersion,"Show KSP version for craft file");
+                    if (oShowVersion != SettingsService.instance.getPluginSettings().showVersion)
+                        SettingsService.instance.SavePluginSettings();
+
+                    SettingsService.instance.getPluginSettings().allowStockVessels = GUILayout.Toggle(SettingsService.instance.getPluginSettings().allowStockVessels, "Include stock craft");
+                    if (oAllowStockVessels != SettingsService.instance.getPluginSettings().allowStockVessels)
+                    {
+                        this.model.ClearCraftList();
+                        SettingsService.instance.SavePluginSettings();
+                    }
+
                     GUILayout.Label("Filter crafts by name:", GUILayout.Width(width));
                     GUI.SetNextControlName(TEXT_FILTER_CONTROL_NAME);
                     using (new GUILayout.HorizontalScope(GUILayout.ExpandWidth(true)))

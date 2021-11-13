@@ -53,7 +53,7 @@ namespace KspCraftOrganizer
     {
         private List<BaseWindow> windows = new List<BaseWindow>();
 
-        static private OrganizerWindow craftOrganizerWindow;
+        static internal OrganizerWindow craftOrganizerWindow;
         private CurrentCraftTagsWindow manageThisCraftWindow;
 
         //private List<ApplicationLauncherButton> appLauncherButtons = new List<ApplicationLauncherButton>();
