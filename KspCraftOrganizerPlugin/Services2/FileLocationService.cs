@@ -61,14 +61,12 @@ namespace KspCraftOrganizer
         }
         public List<string> getAllDirectoriesInDirectory(string directory)
         {
-            Log.Info("getAllDirectoriesInDirectory, directory: " + directory);
             var dirs = Directory.GetDirectories(directory);
             List<string> l = new List<string>();
             foreach (var d in dirs)
             {
                 var d1 = d.Substring(directory.Length + 1);
                 l.Add(d1);
-                Log.Info("dir: " + d + ",    d1: " + d1);
             }
             return l;
         }
@@ -80,16 +78,19 @@ namespace KspCraftOrganizer
 
         public string getCraftSettingsFileForCraftFile(string craftFile)
         {
-            string saveFolder;
-            if (isPathInside(craftFile, getStockCraftDirectoryForCraftType(CraftType.SPH)))
+            string saveFolder = "";
+            for (int dirCnt = 0; dirCnt < ksp.StockDirs().Length; dirCnt++)
             {
-                saveFolder = Globals.combinePaths(ksp.getApplicationRootPath(), "saves", ksp.getNameOfSaveFolder(), "stock_ships_settings", CraftType.SPH.directoryName);
+                if (isPathInside(craftFile, getStockCraftDirectoryForCraftType(CraftType.SPH, dirCnt)))
+                {
+                    saveFolder = Globals.combinePaths(ksp.getApplicationRootPath(), "saves", ksp.getNameOfSaveFolder(), "stock_ships_settings", ksp.StockDirs()[dirCnt], CraftType.SPH.directoryName);
+                }
+                else if (isPathInside(craftFile, getStockCraftDirectoryForCraftType(CraftType.VAB, dirCnt)))
+                {
+                    saveFolder = Globals.combinePaths(ksp.getApplicationRootPath(), "saves", ksp.getNameOfSaveFolder(), "stock_ships_settings", ksp.StockDirs()[dirCnt], CraftType.VAB.directoryName);
+                }
             }
-            else if (isPathInside(craftFile, getStockCraftDirectoryForCraftType(CraftType.VAB)))
-            {
-                saveFolder = Globals.combinePaths(ksp.getApplicationRootPath(), "saves", ksp.getNameOfSaveFolder(), "stock_ships_settings", CraftType.VAB.directoryName);
-            }
-            else
+            if (saveFolder == "")
             {
                 saveFolder = Path.GetDirectoryName(craftFile);
             }
@@ -121,10 +122,12 @@ namespace KspCraftOrganizer
         }
 
 
-        public string getStockCraftDirectoryForCraftType(CraftType type)
+        public string getStockCraftDirectoryForCraftType(CraftType type, int dirCnt)
         {
             if (type != CraftType.SUBASSEMBLY)
-                return Path.Combine(ksp.getStockCraftDirectory(), type.directoryName);
+            {
+                return Path.Combine(ksp.getStockCraftDirectory(dirCnt), type.directoryName);
+            }
             else
                 return Globals.combinePaths(ksp.getApplicationRootPath(), "Subassemblies");
         }
@@ -200,17 +203,20 @@ namespace KspCraftOrganizer
         public string getThumbUrl(string craftPath)
         {
             PluginLogger.logDebug(String.Format("getThumbUrl: craftPath {0}", craftPath));
-            if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SPH)))
+            for (int dirCnt = 0; dirCnt < ksp.StockDirs().Length; dirCnt++)
             {
-                return "/Ships/@thumbs/SPH/" + Path.GetFileNameWithoutExtension(craftPath);
-            }
-            if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.VAB)))
-            {
-                return "/Ships/@thumbs/VAB/" + Path.GetFileNameWithoutExtension(craftPath);
-            }
-            if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SUBASSEMBLY)))
-            {
-                return "/Subassemblies/@thumbs/" + Path.GetFileNameWithoutExtension(craftPath);
+                if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SPH, dirCnt)))
+                {
+                    return ksp.StockDirs()[dirCnt]+ "/@thumbs/SPH/" + Path.GetFileNameWithoutExtension(craftPath);
+                }
+                if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.VAB, dirCnt)))
+                {
+                    return ksp.StockDirs()[dirCnt] + "/@thumbs/VAB/" + Path.GetFileNameWithoutExtension(craftPath);
+                }
+                if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SUBASSEMBLY, dirCnt)))
+                {
+                    return "/Subassemblies/@thumbs/" + Path.GetFileNameWithoutExtension(craftPath);
+                }
             }
             string saveName = extractSaveNameFromCraftPath(craftPath);
             if (isPathInside(craftPath, getCraftDirectoryForCraftType(saveName, CraftType.SPH)))

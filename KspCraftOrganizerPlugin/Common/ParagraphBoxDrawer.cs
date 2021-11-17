@@ -17,9 +17,9 @@ namespace KspNalCommon
             public float height;
         }
 
-        private float width;
+        private readonly float width;
         private float contentHeight = MARGINY * 2;
-        private List<ParagraphDrawData> paragraphs = new List<ParagraphDrawData>();
+        private readonly List<ParagraphDrawData> paragraphs = new List<ParagraphDrawData>();
 
         public ParagraphBoxDrawer(float width)
         {

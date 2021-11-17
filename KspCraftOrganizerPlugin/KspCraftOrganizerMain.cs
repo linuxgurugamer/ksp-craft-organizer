@@ -20,7 +20,7 @@ namespace KspCraftOrganizer
 
         public int getInitialWindowId()
         {
-            return WindowHelper.NextWindowId("KspCraftOrganizerProperties");
+            return WindowHelper.NextWindowId("KCO_Properties");
         }
 
         public string getPluginDirectory()
@@ -51,7 +51,7 @@ namespace KspCraftOrganizer
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class KspCraftOrganizerMain : MonoBehaviour2
     {
-        private List<BaseWindow> windows = new List<BaseWindow>();
+        private readonly List<BaseWindow> windows = new List<BaseWindow>();
 
         static internal OrganizerWindow craftOrganizerWindow;
         private CurrentCraftTagsWindow manageThisCraftWindow;
@@ -232,11 +232,9 @@ namespace KspCraftOrganizer
 
         public void OnGUI()
         {
-            //if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout) {
-            //	COLogger.Log(Event.current);
-            //}
             RegisterToolbar.UpdateStyles(craftOrganizerWindow.guiStyleOption.id);
 
+            GUI.enabled = !DirectorySelect.instance.IsEnabled && Settings.instance == null;
             foreach (BaseWindow window in windows)
             {
                 window.onGUI();

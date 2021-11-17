@@ -63,7 +63,6 @@ namespace KspCraftOrganizer
         {
             string craftDirectory = fileLocationService.getCraftDirectoryForCraftType(model.currentSave, model.craftType);
             string dir = FixSeparators(craftDirectory + Path.DirectorySeparatorChar + curDir + Path.DirectorySeparatorChar + dirName);
-            Log.Info("GetCountOfFilesInDir, dir: " + dir);
             if (Directory.Exists(dir))
             {
                 int fileCount = Directory.GetFiles(dir, "*.craft", SearchOption.AllDirectories).Length;
@@ -76,7 +75,6 @@ namespace KspCraftOrganizer
             string craftDirectory = fileLocationService.getCraftDirectoryForCraftType(model.currentSave, model.craftType);
             string dir = FixSeparators(craftDirectory + Path.DirectorySeparatorChar + curDir + Path.DirectorySeparatorChar + dirName);
 
-            Log.Info("DeleteDir, dir: " + dir);
             if (Directory.Exists(dir))
             {
                 Directory.Delete(dir, true);

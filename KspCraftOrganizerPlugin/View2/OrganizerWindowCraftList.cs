@@ -52,7 +52,7 @@ namespace KspCraftOrganizer
                         int index = 0;
                         foreach (OrganizerCraftEntity craft in model.filteredCrafts)
                         {
-
+                            GUI.enabled = Settings.instance == null;
                             if (craft.IsDir)
                             {
                                 drawDirectory(index, craft);
@@ -194,6 +194,20 @@ namespace KspCraftOrganizer
                         GUILayout.FlexibleSpace();
                     }
                 }
+                var b = craft.isSelectedForMove;
+                GUI.enabled = !craft.isAutosaved && Settings.instance == null;
+                craft.isSelectedForMove = GUILayout.Toggle(craft.isSelectedForMove, "");
+                GUI.enabled = Settings.instance == null;
+                if (craft.isSelectedForMove)
+                {
+                    model.unselectAllCrafts();
+                    craft.isSelectedForMove = true;
+                    model.primaryCraft = null;
+                }
+                if (b != craft.isSelectedForMove)
+                {
+                    model.SelectedMoveCount = null;
+                }
                 using (new GUILayout.VerticalScope(GUILayout.ExpandWidth(true)))
                 {
                     GUIStyle thisCraftButtonStyle = craft.isSelectedPrimary ? parent.toggleButtonStyleTrue : parent.toggleButtonStyleFalse;
@@ -260,7 +274,6 @@ namespace KspCraftOrganizer
                             craft.guiHeight += 20;
                         }
                     }
-
                     if (GUILayout.Button("", thisCraftButtonStyle, GUILayout.Height(craft.guiHeight), GUILayout.ExpandHeight(false)))
                     {
                         if ((Event.current.modifiers & EventModifiers.Control) == 0 || !parent.showManageTagsToolbar)

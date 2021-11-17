@@ -26,6 +26,7 @@ namespace KspCraftOrganizer
         public bool replace_editor_load_button;
         public bool showVersion;
         public bool allowStockVessels;
+        public bool onlyStockVessels = false; // Not saved, just here for convenience
         public ICollection<string> defaultAvailableTags { get; set; }
     }
 
@@ -206,7 +207,8 @@ namespace KspCraftOrganizer
 
         bool isShowStockCrafts();
 
-        string getStockCraftDirectory();
+         string[] StockDirs();
+        string getStockCraftDirectory(int x);
 
         string getAutoSaveCraftName();
 

@@ -52,6 +52,12 @@ namespace KspCraftOrganizer
         private bool isDir = false;
         private string _dirName;
 
+        public void CraftFileInfo(out string directory, out string filename)
+        {
+            directory = _dirName;
+            filename = _craftFile;
+        }
+
         private CraftDaoDto craftDto
         {
             get
@@ -146,7 +152,11 @@ namespace KspCraftOrganizer
                 toRet += name;
                 if (isStock)
                 {
-                    toRet += " (Stock) ";
+                    var str = FileDirectory;
+                    if (str != "")
+                        toRet += " (Stock) (" + FileDirectory + ") ";
+                    else
+                        toRet += " (Stock) ";
                 }
                 if (name != nameFromFile && !isAutosaved)
                 {
@@ -186,7 +196,7 @@ namespace KspCraftOrganizer
 
         public int partCount { get { return craftDto.partCount; } }
 
-        public string kspVersion {  get { return craftDto.kspVersion; } }
+        public string kspVersion { get { return craftDto.kspVersion; } }
         public int crewCapacity { get { return craftDto.crewCapacity; } }
         public float mass { get { return craftDto.mass; } }
 
@@ -276,6 +286,7 @@ namespace KspCraftOrganizer
             }
         }
 
+        public bool isSelectedForMove { get; set; }
         public ICollection<string> tags
         {
             get
@@ -354,6 +365,24 @@ namespace KspCraftOrganizer
             get
             {
                 return Path.GetFileNameWithoutExtension(craftFile);
+            }
+        }
+
+        public string FileDirectory
+        {
+            get
+            {
+                string str = Path.GetDirectoryName(craftFile);
+                str = str.Substring(IKspAlProvider.instance.getApplicationRootPath().Length);
+                if (!str.StartsWith("GameData"))
+                    return "";
+                else
+                {
+                    int start = "GameData/".Length;
+                    str = str.Substring(start);
+                    int end = str.IndexOf("Ships");
+                    return str.Substring(0, end - 1);
+                }
             }
         }
 

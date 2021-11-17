@@ -1,10 +1,7 @@
-﻿using KSP.UI.Screens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using SpaceTuxUtility;
 using ClickThroughFix;
+using static KspCraftOrganizer.RegisterToolbar;
 
 namespace KspCraftOrganizer
 {
@@ -20,46 +17,51 @@ namespace KspCraftOrganizer
         {
             instance = this;
             win = new Rect((Screen.width - WIDTH) / 2, (Screen.height - HEIGHT) / 2, WIDTH, HEIGHT);
-            _windowId = WindowHelper.NextWindowId("KspCraftOrganizerSettings");
+            _windowId = WindowHelper.NextWindowId("KCO_Settings");
+
         }
         void OnGUI()
         {
             if (KspNalCommon.GuiStyleOption.SKIN_STATES[KspNalCommon.GuiStyleOption.lastSelected] == KspNalCommon.GuiStyleOption.Ksp)
             {
                 GUI.skin = KspNalCommon.PluginCommons.instance.kspSkin();
-                win.width = 250;
-                win.height = 125;
+                win.width = 275;
+                win.height = 160;
             }
             else
             {
-                win.width = 200;
-                win.height = 100;
-                GUI.skin = GUI.skin;
+                win.width = 225;
+                win.height = 125;                
             }
 
-
-            win =ClickThruBlocker.GUILayoutWindow(12345, win, DoWin, "Settings");
+            win = ClickThruBlocker.GUILayoutWindow(_windowId, win, DoWin, "Settings");
         }
 
         void DoWin(int id)
         {
-            GUILayout.BeginVertical();
-            SettingsService.instance.getPluginSettings().debug =
-                GUILayout.Toggle(SettingsService.instance.getPluginSettings().debug, "Debug");
-            SettingsService.instance.getPluginSettings().replace_editor_load_button =
-                GUILayout.Toggle(SettingsService.instance.getPluginSettings().replace_editor_load_button, "Replace editor load button");
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-
-            if (GUILayout.Button("Close"))
+            if (Event.current.type == EventType.Repaint)
+                GUI.BringWindowToFront(_windowId);
+            using (new GUILayout.VerticalScope())
             {
-                SettingsService.instance.SavePluginSettings();
-                OnDestroy();
+                SettingsService.instance.getPluginSettings().debug =
+                    GUILayout.Toggle(SettingsService.instance.getPluginSettings().debug, "Debug");
+                SettingsService.instance.getPluginSettings().replace_editor_load_button =
+                    GUILayout.Toggle(SettingsService.instance.getPluginSettings().replace_editor_load_button, "Replace editor load button (must exit editor to apply)");
+                SettingsService.instance.getPluginSettings().showVersion = GUILayout.Toggle(SettingsService.instance.getPluginSettings().showVersion, "Show KSP version for craft file");
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.FlexibleSpace();
+
+
+                    if (GUILayout.Button("Close"))
+                    {
+                        SettingsService.instance.SavePluginSettings();
+                        OnDestroy();
+                    }
+                    GUILayout.FlexibleSpace();
+                }
             }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
             GUI.DragWindow();
         }
 

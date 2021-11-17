@@ -41,12 +41,19 @@ namespace KspCraftOrganizer
 
             string craftDirectory = fileLocationService.getCraftDirectoryForCraftType(saveName, type);
             List<OrganizerCraftEntity> toRetList = new List<OrganizerCraftEntity>();
-            toRetList.AddRange(fetchAvailableCraftsAndDirectories(craftDirectory, type, false));
+
+            if (!SettingsService.instance.getPluginSettings().onlyStockVessels)
+                toRetList.AddRange(fetchAvailableCraftsAndDirectories(craftDirectory, type, false));
 
             if (ksp.isShowStockCrafts() && parent.thisIsPrimarySave)
             {
-                craftDirectory = fileLocationService.getStockCraftDirectoryForCraftType(type);
-                toRetList.AddRange(fetchAvailableCraftsAndDirectories(craftDirectory, type, true));
+                for (int dirCnt = 0; dirCnt < ksp.StockDirs().Length; dirCnt++)
+                {
+                    craftDirectory = fileLocationService.getStockCraftDirectoryForCraftType(type, dirCnt);
+                    if (SettingsService.instance.getPluginSettings().onlyStockVessels && craftDirectory.Contains("saves"))
+                        continue;
+                    toRetList.AddRange(fetchAvailableCraftsAndDirectories(craftDirectory, type, true));
+                }
             }
 
             toRetList.Sort(delegate (OrganizerCraftEntity c1, OrganizerCraftEntity c2)
@@ -346,6 +353,19 @@ namespace KspCraftOrganizer
             clearCaches("craft deleted");
         }
 
+        public int? selectedMoveCount = null;
+        public int MoveSelectCount()
+        {
+            if (selectedMoveCount != null)
+                return (int)selectedMoveCount;
+
+            int i = 0;
+            foreach (OrganizerCraftEntity craft in filteredCrafts)
+                if (craft.isSelectedForMove)
+                    i++;
+            selectedMoveCount = i;
+            return i;
+        }
         public void unselectAllCrafts()
         {
             foreach (OrganizerCraftEntity craft in filteredCrafts)
@@ -354,6 +374,23 @@ namespace KspCraftOrganizer
             }
         }
 
+        public void unselectAllMoveCrafts()
+        {
+            foreach (OrganizerCraftEntity craft in filteredCrafts)
+            {
+                craft.isSelectedForMove = false;
+            }
+               selectedMoveCount = null;
+     }
+
+        public List<OrganizerCraftEntity> GetCraftSelectedForMove()
+        {
+            List<OrganizerCraftEntity> oce = new List<OrganizerCraftEntity>();
+            foreach (OrganizerCraftEntity craft in filteredCrafts)
+                if (craft.isSelectedForMove)
+                    oce.Add(craft);
+            return oce;
+        }
         private void updateSelectedCrafts(bool selectAll)
         {
             if (forceUncheckSelectAllFiltered)

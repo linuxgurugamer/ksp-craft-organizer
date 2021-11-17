@@ -24,7 +24,7 @@ namespace KspNalCommon
 
         private Texture2D downArrowImage;
         private List<T> _items;
-        private Stringizer stringizer;
+        private readonly Stringizer stringizer;
         //private Texture2D hoverBackgroundTexture = UiUtils.createSingleColorTexture(new Color(200, 200, 200));
         private float openedListMaxItemWidth;
         private float openedListItemHeight;
@@ -257,7 +257,7 @@ namespace KspNalCommon
             {
                 int index = 0;
                 bool found = false;
-                int oldSelected = selectedItemIndex;
+                //int oldSelected = selectedItemIndex;
                 foreach (T item in _items)
                 {
                     if (EqualityComparer<T>.Default.Equals(item, value))

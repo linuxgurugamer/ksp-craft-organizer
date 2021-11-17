@@ -188,6 +188,7 @@ namespace KspCraftOrganizer
                 if (Settings.instance == null)
                 {
                     GameObject go = new GameObject();
+
                     var w = go.AddComponent<Settings>();
                 }
             }
@@ -210,6 +211,10 @@ namespace KspCraftOrganizer
                     {
                         using (new GUILayout.HorizontalScope())
                         {
+                            if (GUILayout.Button("Clear"))
+                            {
+                                model.unselectAllMoveCrafts();
+                            }
                             drawCraftsFilteredWarning();
                             GUILayout.FlexibleSpace();
                             if (!showManageTagsToolbar)
@@ -376,13 +381,14 @@ namespace KspCraftOrganizer
                     var width = FILTER_TOOLBAR_WIDTH - 10 - skin.verticalScrollbar.CalcScreenSize(skin.verticalScrollbar.CalcSize(new GUIContent(""))).x;
 
                     bool oAllowStockVessels = SettingsService.instance.getPluginSettings().allowStockVessels;
-                    bool oShowVersion = SettingsService.instance.getPluginSettings().showVersion;
-                    SettingsService.instance.getPluginSettings().showVersion = GUILayout.Toggle(SettingsService.instance.getPluginSettings().showVersion,"Show KSP version for craft file");
-                    if (oShowVersion != SettingsService.instance.getPluginSettings().showVersion)
-                        SettingsService.instance.SavePluginSettings();
-
+                    bool oOnlyStockVessels = SettingsService.instance.getPluginSettings().onlyStockVessels;
+                    GUI.enabled = !SettingsService.instance.getPluginSettings().onlyStockVessels;
                     SettingsService.instance.getPluginSettings().allowStockVessels = GUILayout.Toggle(SettingsService.instance.getPluginSettings().allowStockVessels, "Include stock craft");
-                    if (oAllowStockVessels != SettingsService.instance.getPluginSettings().allowStockVessels)
+                    GUI.enabled = SettingsService.instance.getPluginSettings().allowStockVessels;
+                    SettingsService.instance.getPluginSettings().onlyStockVessels = GUILayout.Toggle(SettingsService.instance.getPluginSettings().onlyStockVessels, "Only stock craft");
+                    GUI.enabled = true;
+                    if (oAllowStockVessels != SettingsService.instance.getPluginSettings().allowStockVessels ||
+                        oOnlyStockVessels != SettingsService.instance.getPluginSettings().onlyStockVessels)
                     {
                         this.model.ClearCraftList();
                         SettingsService.instance.SavePluginSettings();
@@ -461,14 +467,14 @@ namespace KspCraftOrganizer
                                         foreach (TagInGroup<OrganizerTagEntity> tagInGroup in tagGroup.tags)
                                         {
                                             OrganizerTagEntity tag = tagInGroup.originalTag;
-                                            GUILayout.BeginHorizontal();
-
-                                            string s = tag.NOT ? "Not have" : "Have";
-                                            if (GUILayout.Button(s, GUI.skin.label, GUILayout.Width(65)))
-                                                tag.NOT = !tag.NOT;
-                                            tag.selectedForFiltering = guiLayout_Toggle_OrigSkin(tag.selectedForFiltering, " " + tagInGroup.tagDisplayName);
-                                            GUILayout.FlexibleSpace();
-                                            GUILayout.EndHorizontal();
+                                            using (new GUILayout.HorizontalScope())
+                                            {
+                                                string s = tag.NOT ? "Not have" : "Have";
+                                                if (GUILayout.Button(s, GUI.skin.label, GUILayout.Width(65)))
+                                                    tag.NOT = !tag.NOT;
+                                                tag.selectedForFiltering = guiLayout_Toggle_OrigSkin(tag.selectedForFiltering, " " + tagInGroup.tagDisplayName);
+                                                GUILayout.FlexibleSpace();
+                                            }
                                             GUILayout.Space(5);
                                         }
                                         bool noneSelected = guiLayout_Toggle_OrigSkin(filterTagsGrouper.hasGroupSelectedNoneFilter(tagGroup.name), " <with no tag assigned>");
@@ -521,14 +527,15 @@ namespace KspCraftOrganizer
                                     }
                                     foreach (OrganizerTagEntity tag in filterTagsGrouper.restTags)
                                     {
-                                        GUILayout.BeginHorizontal();
-                                        string s = tag.NOT ? "Not have" : "Have";
-                                        if (GUILayout.Button(s, GUI.skin.label, GUILayout.Width(65)))
-                                            tag.NOT = !tag.NOT;
+                                        using (new GUILayout.HorizontalScope())
+                                        {
+                                            string s = tag.NOT ? "Not have" : "Have";
+                                            if (GUILayout.Button(s, GUI.skin.label, GUILayout.Width(65)))
+                                                tag.NOT = !tag.NOT;
 
-                                        tag.selectedForFiltering = guiLayout_Toggle_OrigSkin(tag.selectedForFiltering, " " + tag.name);
-                                        GUILayout.FlexibleSpace();
-                                        GUILayout.EndHorizontal();
+                                            tag.selectedForFiltering = guiLayout_Toggle_OrigSkin(tag.selectedForFiltering, " " + tag.name);
+                                            GUILayout.FlexibleSpace();
+                                        }
                                         GUILayout.Space(5);
                                     }
                                 }
@@ -716,6 +723,14 @@ namespace KspCraftOrganizer
         void ShowFolderButtons()
         {
             GUILayout.FlexibleSpace();
+            GUI.enabled = (model.MoveSelectCount() > 0) && !DirectorySelect.instance.IsEnabled && Settings.instance == null;
+            if (GUILayout.Button("Move selected"))
+            {
+                DirectorySelect.instance.SetParent(this);
+                DirectorySelect.instance.SetEnable = true;
+            }
+
+            GUI.enabled = (Settings.instance == null);
             if (!delFolder)
             {
                 if (!newFolder && GUILayout.Button("New Folder", GUILayout.Width(bottomButtonsWidth + 40)))
@@ -743,7 +758,7 @@ namespace KspCraftOrganizer
             }
             else
             {
-                GUI.enabled = dirSelected;
+                GUI.enabled = dirSelected && Settings.instance == null;
                 if (!delFolder)
                 {
                     if (GUILayout.Button("Delete Folder", RegisterToolbar.buttonStyleOrange, GUILayout.Width(bottomButtonsWidth + 40)))
@@ -772,7 +787,7 @@ namespace KspCraftOrganizer
                     }
 
                 }
-                GUI.enabled = true;
+                GUI.enabled = (Settings.instance == null);
             }
             GUILayout.FlexibleSpace();
         }

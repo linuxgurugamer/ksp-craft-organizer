@@ -13,7 +13,7 @@ namespace KspNalCommon
 
         public static int lastSelected = 0;
 
-        private string _id;
+        private readonly string _id;
         private string _displayName;
 
         public string id { get { return _id; } }

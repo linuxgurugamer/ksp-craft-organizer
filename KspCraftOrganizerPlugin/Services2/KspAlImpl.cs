@@ -109,6 +109,7 @@ namespace KspCraftOrganizer
                     _kspSkin.label.font = defaultGuiSkin.font;
                 }
                 onGuiInitialized = true;
+                InitStockDirs();
             }
         }
 
@@ -132,9 +133,29 @@ namespace KspCraftOrganizer
             return HighLogic.SaveFolder;
         }
 
-        public string getStockCraftDirectory()
+        private string[] stockDirs =
         {
-            return Path.Combine(KSPUtil.ApplicationRootPath, "Ships");
+           "Ships",
+           "GameData/SquadExpansion/MakingHistory/Ships",
+           "GameData/SquadExpansion/Serenity/Ships"
+        };
+
+        private void InitStockDirs()
+        {
+            List<String> s = Directory.GetDirectories(getApplicationRootPath() + "GameData", "Ships", SearchOption.AllDirectories).ToList();
+            for (int x = s.Count - 1; x > 0; x--)
+                if (s[x].Contains("Missions"))
+                    s.Remove(s[x]);
+            s.Add("Ships");
+            stockDirs = s.ToArray();
+        }
+        public string[] StockDirs()
+        {
+            return stockDirs;
+        }
+        public string getStockCraftDirectory(int x)
+        {
+            return Path.Combine(KSPUtil.ApplicationRootPath, stockDirs[x]);
         }
 
         public bool isShowStockCrafts()
@@ -841,6 +862,7 @@ namespace KspCraftOrganizer
                 toRet.replace_editor_load_button = readBoolFromSettings(settings, "replace_editor_load_button", true);
                 toRet.showVersion = readBoolFromSettings(settings, "showVersion", true);
                 toRet.allowStockVessels = readBoolFromSettings(settings, "allowStockVessels", HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels);
+                toRet.onlyStockVessels = readBoolFromSettings(settings, "onlyStockVessels", false);
             }
 
             if (settingsChanged)
@@ -920,6 +942,7 @@ namespace KspCraftOrganizer
             settingsToWrite.AddValue("replace_editor_load_button", settings.replace_editor_load_button);
             settingsToWrite.AddValue("showVersion", settings.showVersion);
             settingsToWrite.AddValue("allowStockVessels", settings.allowStockVessels);
+            settingsToWrite.AddValue("onlyStockVessels", settings.onlyStockVessels);
             settingsToWrite.Save(fileName);
         }
 

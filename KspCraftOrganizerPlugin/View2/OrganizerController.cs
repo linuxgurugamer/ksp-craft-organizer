@@ -202,11 +202,28 @@ namespace KspCraftOrganizer
             }
         }
 
+        public int? SelectedMoveCount
+        {
+            get { return craftList.selectedMoveCount; }
+            set { craftList.selectedMoveCount = value; }
+        }
         public void unselectAllCrafts()
         {
             craftList.unselectAllCrafts();
         }
 
+        public int MoveSelectCount()
+        {
+            return craftList.MoveSelectCount();
+        }
+        public void unselectAllMoveCrafts()
+        {
+            craftList.unselectAllMoveCrafts();
+        }
+        public List<OrganizerCraftEntity> GetCraftSelectedForMove()
+        {
+            return craftList.GetCraftSelectedForMove();
+        }
         public void update(string selectedSave, bool selectAll)
         {
             //

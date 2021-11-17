@@ -24,10 +24,14 @@ Changelog
 	Added toggle to show KSP version 
 	Added toggle to show stock files (stock setting is used initially)
 
-TODO
+1.7.0.2
+	Moved toggle for showing KSP version to setting screen
 
-	Add way to move craft files into subdirectory ???
-	add way to save craft in different save/directory
-
-	Include/exclude stock
+1.7.0.3
+	Fixed screen going grey
+	Added ability to move craft files to a different directory
+	Added search for all directories called "Ships" in all mod directories, will include them under stock settings.  This is not a feature of the stock loader
+	Added include for DLC Ships directores.  This IS a feature of the stock loader
+	Added display of directory where craft comes from (only when from a mod)
+	Added toggle for Only Stock Craft
 	

@@ -11,27 +11,25 @@ namespace KspNalCommon
         private static readonly float UNLOCK_WAIT_THRESHOLD = 0.5f;
         private static int WINDOW_ID = PluginCommons.instance.getInitialWindowId();
 
-        private string _name;
+        private readonly string _name;
         protected Rect windowPos { get; private set; }
         private bool _windowDisplayed;
         private GUISkin _originalSkin;
         private GUISkin _skin;
-        private int windowId = WINDOW_ID++;
+        protected int windowId = WINDOW_ID++;
         private bool centered = false;
         //private GUIStyle fadeStyle;
         private bool wasLockedOnMouseOver;
         private bool waitingForUnlockEditor;//to solve the problem with accidental clicks when user clicks "cancel"
         private float waitingForUnlockEditorStartTime;
-
         public Globals.Procedure OnHide { get; set; }
 
         public bool justAfterWindowDisplay { get; private set; }
 
-        public BaseWindow(string name)
+        protected BaseWindow(string name)
         {
             this._name = name;
             this.guiStyleOption = GuiStyleOption.Ksp;
-            //RegisterToolbar.UpdateStyles(this.guiStyleOption.id);
         }
 
 
@@ -43,8 +41,6 @@ namespace KspNalCommon
         virtual public void displayWindow()
         {
             PluginLogger.logDebug("DisplayWindow: " + _name);
-            //float height = getWindowHeight(windowPos);
-            //float windowWidth = getWindowWidth(windowPos);
             windowPos = new Rect((Screen.width - windowWidthOnScreen) / 2, (Screen.height - windowHeightOnScreen) / 2, windowWidth, windowHeight);
             _windowDisplayed = true;
             centered = false;
@@ -54,44 +50,20 @@ namespace KspNalCommon
 
         virtual protected float getWindowHeightOnScreen(Rect pos)
         {
-            return Screen.height * 8 / 10;
+            return Screen.height * 8f / 10f;
         }
 
         abstract protected float getWindowWidthOnScreen(Rect pos);
 
         abstract protected float getMinWindowInnerWidth(Rect pos);
 
-        public float windowHeight
-        {
-            get
-            {
-                return windowHeightOnScreen / getGuiScale();
-            }
-        }
+        public float windowHeight { get { return windowHeightOnScreen / getGuiScale(); } }
 
-        private float windowHeightOnScreen
-        {
-            get
-            {
-                return getWindowHeightOnScreen(windowPos);
-            }
-        }
+        private float windowHeightOnScreen { get { return getWindowHeightOnScreen(windowPos); } }
 
-        public float windowWidth
-        {
-            get
-            {
-                return windowWidthOnScreen / getGuiScale();
-            }
-        }
+        public float windowWidth { get { return windowWidthOnScreen / getGuiScale(); } }
 
-        private float windowWidthOnScreen
-        {
-            get
-            {
-                return getWindowWidthOnScreen(windowPos);
-            }
-        }
+        private float windowWidthOnScreen { get { return getWindowWidthOnScreen(windowPos); } }
 
 
         virtual public void update()
@@ -109,15 +81,7 @@ namespace KspNalCommon
 
         public GUISkin skin { get { return _skin; } }
 
-        protected float guiRawScale
-        {
-            get
-            {
-                //float scale = OrganizerWindowCraftList.debugScale;
-                //float scale = GameSettings.UI_SCALE;
-                return GameSettings.UI_SCALE;
-            }
-        }
+        protected float guiRawScale        {            get            {                return GameSettings.UI_SCALE;            }        }
 
         private float getGuiScale()
         {
@@ -189,9 +153,6 @@ namespace KspNalCommon
 
                 using (new ScaledGuiScope(getGuiScale(), windowPos.x, windowPos.y))
                 {
-                    //GUIUtility.ScaleAroundPivot(new Vector2(getGuiScale(), getGuiScale()), new Vector2(windowPos.x, windowPos.y));
-
-
                     windowPos = ClickThruBlocker.GUILayoutWindow(windowId, windowPos, windowGUIPriv, _name);
                     if (!centered && Event.current.type == EventType.Repaint)
                     {
