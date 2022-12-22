@@ -35,3 +35,14 @@ Changelog
 	Added display of directory where craft comes from (only when from a mod)
 	Added toggle for Only Stock Craft
 	
+1.7.1
+	Added craft history
+		Do backup after every change
+		Do backup after every save
+		backup at regular timed intervals
+	Moved settings into stock settings from local conf file 
+
+1.7.2 
+	Made buttons for folder selection smaller
+	Added toggle to list folders first or last
+	Added toggle to show or hide history folders

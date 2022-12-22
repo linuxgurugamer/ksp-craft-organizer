@@ -1,3 +1,12 @@
+
+
+
+Add Saving your craft file after every change of the craft or periodically
+	on save
+	on change
+	Into folder, craft name is folder name
+
+
 TODO:
  - Solve problem with FerramAerospaceResearch, ProceduralParts
  - Avoid exceptions in Making History expansion

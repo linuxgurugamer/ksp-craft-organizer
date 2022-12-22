@@ -160,7 +160,7 @@ namespace KspCraftOrganizer
 
         public bool isShowStockCrafts()
         {
-            return /*HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels || */ SettingsService.instance.getPluginSettings().allowStockVessels;
+            return HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels; // /*HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels || */ HighLogic.CurrentGame.Parameters.CustomParams<VN_Settings>().allowStockVessels;
         }
 
         public CraftType getCurrentEditorFacilityType()
@@ -765,7 +765,17 @@ namespace KspCraftOrganizer
         {
             PluginLogger.logDebug("Loading craft in '" + file + "' into workspace");
 
-            EditorLogic.LoadShipFromFile(file);
+            if (file.Contains(DirectoryServices.historyDirectory))
+            {
+                var s = DirectoryServices.FixSeparators(Path.GetDirectoryName(file));
+                int x = s.LastIndexOf(Path.DirectorySeparatorChar);
+                s.Substring(x, s.IndexOf(DirectoryServices.historyDirectory) - x);
+                DirectoryServices.PopDir();
+                EditorLogic.LoadShipFromFile(file);
+                EditorLogic.fetch.ship.shipName = s;
+            }
+            else
+                EditorLogic.LoadShipFromFile(file);
             PluginLogger.logDebug("Craft loaded");
         }
 
@@ -809,7 +819,7 @@ namespace KspCraftOrganizer
         public void saveCurrentCraft()
         {
             string savePath = ShipConstruction.GetSavePath(EditorLogic.fetch.ship.shipName);
-            PluginLogger.logDebug("Saving current shipt to " + savePath);
+            PluginLogger.logDebug("Saving current ship to " + savePath);
             EditorLogic.fetch.ship.SaveShip().Save(savePath);
             PluginLogger.logDebug("Done Saving current shipt");
         }
@@ -819,10 +829,15 @@ namespace KspCraftOrganizer
             PluginLogger.logDebug("Reading plugin settings from " + fileName);
 
             PluginSettings toRet = new PluginSettings();
+#if false
             toRet.debug = false;
             toRet.replace_editor_load_button = true;
             toRet.showVersion = false;
             toRet.allowStockVessels = HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels;
+
+            toRet.autosaveOnChange = false;
+            toRet.autosaveOnSave = false;
+#endif
 
             List<string> defaultAvailableTags = new List<string>();
             toRet.defaultAvailableTags = defaultAvailableTags;
@@ -858,11 +873,16 @@ namespace KspCraftOrganizer
                     defaultAvailableTags.AddUniqueRange(getDefaultTags());
                     settingsChanged = true;
                 }
+#if false
                 toRet.debug = readBoolFromSettings(settings, "debug", false);
                 toRet.replace_editor_load_button = readBoolFromSettings(settings, "replace_editor_load_button", true);
                 toRet.showVersion = readBoolFromSettings(settings, "showVersion", true);
                 toRet.allowStockVessels = readBoolFromSettings(settings, "allowStockVessels", HighLogic.CurrentGame.Parameters.Difficulty.AllowStockVessels);
                 toRet.onlyStockVessels = readBoolFromSettings(settings, "onlyStockVessels", false);
+
+                toRet.autosaveOnChange = readBoolFromSettings(settings, "autosaveOnChange", false); ;
+                toRet.autosaveOnSave = readBoolFromSettings(settings, "autosaveOnSave", false); ;
+#endif
             }
 
             if (settingsChanged)
@@ -872,7 +892,6 @@ namespace KspCraftOrganizer
 
             return toRet;
         }
-
         public void savePluginSettings(PluginSettings toRet, string fileName)
         {
             writePluginSettings(toRet, fileName);
@@ -937,11 +956,15 @@ namespace KspCraftOrganizer
             {
                 settingsToWrite.AddValue("defaultAvailableTag", tag);
             }
-
+#if false
             settingsToWrite.AddValue("debug", settings.debug);
             settingsToWrite.AddValue("replace_editor_load_button", settings.replace_editor_load_button);
             settingsToWrite.AddValue("showVersion", settings.showVersion);
             settingsToWrite.AddValue("allowStockVessels", settings.allowStockVessels);
+
+            settingsToWrite.AddValue("autosaveOnChange", settings.autosaveOnChange);
+            settingsToWrite.AddValue("autosaveOnSave", settings.autosaveOnSave);
+#endif
             settingsToWrite.AddValue("onlyStockVessels", settings.onlyStockVessels);
             settingsToWrite.Save(fileName);
         }

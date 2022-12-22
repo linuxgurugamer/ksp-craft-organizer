@@ -55,7 +55,9 @@ namespace KspCraftOrganizer
                             GUI.enabled = Settings.instance == null;
                             if (craft.IsDir)
                             {
-                                drawDirectory(index, craft);
+                                if (OrganizerWindow.showHistoryFolders || !craft.DirName.Contains(DirectoryServices.historyDirectory))
+
+                                    drawDirectory(index, craft);
                             }
                             else
                             {
@@ -118,7 +120,7 @@ namespace KspCraftOrganizer
                     }
                     float thisShipWidth = dir.guiWidth;
                     bool smallThumb = parent.showManageTagsToolbar && parent.windowWidth < 1000;
-                    dir.guiHeight = 80;
+                    dir.guiHeight = 40; // 80;
 
                     if (GUILayout.Button("", thisCraftButtonStyle, GUILayout.Height(dir.guiHeight), GUILayout.ExpandHeight(false)))
                     {
@@ -332,7 +334,7 @@ namespace KspCraftOrganizer
                     drawScaledLabel(craft.cost > model.availableFunds && model.availableFunds >= 0 ? parent.warningLabelStyle : RegisterToolbar.goodLabelStyle, costPosX, nextTop, costMaxWidth, thisShipRect, "Cost: " + craft.costToDisplay);
                     nextTop += 20;
                     string ver = "";
-                    if (SettingsService.instance.getPluginSettings().showVersion)
+                    if (HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().showVersion)
                         ver = "      KSP version: " + craft.kspVersion;
                     drawLabel(parent.skin.label, firstRowsLeftOffset, nextTop, "Last modification time: " + craft.lastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")+ ver);
                     nextTop += 20;

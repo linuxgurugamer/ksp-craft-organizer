@@ -1,8 +1,12 @@
 ﻿using System;
 using System.IO;
 using KSP.UI.Screens;
+using System.Collections;
+using UnityEngine;
+
 using KspNalCommon;
-using KSP.UI;
+using KSP.Localization;
+using static KspCraftOrganizer.RegisterToolbar;
 
 namespace KspCraftOrganizer
 {
@@ -27,7 +31,7 @@ namespace KspCraftOrganizer
 	 * in both cases: Undo and redo, but redo are never sent so we cannot detect it reliably.
 	 * 
 	 */
-    public class EditorListenerService
+    public class EditorListenerService : MonoBehaviour
     {
 
         public static EditorListenerService instance = new EditorListenerService();
@@ -57,6 +61,7 @@ namespace KspCraftOrganizer
         public OnShipLoaded onShipLoaded { get; set; }
         public OnEditorStarted onEditorStarted { get; set; }
 
+        int btnId;
         public void start()
         {
             GameEvents.onEditorStarted.Add(this.processOnEditorStarted);
@@ -64,7 +69,14 @@ namespace KspCraftOrganizer
             EditorLogic.fetch.shipNameField.onValueChanged.AddListener(this.processOnShipNameChanged);
 
             GameEvents.onEditorShipModified.Add(this.onEditorShipModified);
-            GameEvents.onEditorUndo.Add(this.onEditorUndo);
+            //GameEvents.onEditorUndo.Add(this.onEditorUndo);
+
+            //            GameEvents.onEditorRestart.Add(OnEditorRestart);//fired when New Craft is pressed!
+
+            ButtonManager.BtnManager.InitializeListener(EditorLogic.fetch.saveBtn, NullMethod, "CraftOrganizer");
+
+            btnId = ButtonManager.BtnManager.AddListener(EditorLogic.fetch.saveBtn, OnSaveButtonInput, "CraftOrganizer", "CraftOrganizer");
+
 
             onShipSaved += delegate (string path, bool craftSavedToNewFile)
             {
@@ -115,17 +127,86 @@ namespace KspCraftOrganizer
             }
         }
 
+        internal IEnumerator TimedCraftBackup()
+        {
+            while (true)
+            {
+                Log.Info("TimedCraftBackup loop, backuInterval: " + HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().backupInterval * 60f);
+                if (isModifiedSinceSave)
+                {
+                    CreateCraftBackup(EditorLogic.fetch.ship);
+                    ScreenMessages.PostScreenMessage("Vessel backup saved", 15, ScreenMessageStyle.UPPER_CENTER);
+                }
+                yield return new WaitForSecondsRealtime ((float)HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().backupInterval*60f);
+            }
+        }
+
+        void NullMethod()
+        {
+        }
+
+        public void OnSaveButtonInput()
+        {
+            IKspAl ksp = IKspAlProvider.instance;
+
+            ksp.saveCurrentCraft();
+            if (HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterSave && 
+                !HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterChange)
+                CreateCraftBackup(EditorLogic.fetch.ship);
+
+            ButtonManager.BtnManager.InvokeNextDelegate(btnId, "CraftOrganizer");
+        }
         public bool isModifiedSinceSave { get; private set; }
 
         private void onEditorShipModified(ShipConstruct s)
         {
+            Log.Info("EditorListenerService.onEditorShipModified, autosaveOnChange: " + HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterChange);
             isModifiedSinceSave = true;
+            if (HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterChange)
+                CreateCraftBackup(EditorLogic.fetch.ship);
         }
 
+#if false
         private void onEditorUndo(ShipConstruct s)
         {
             //we cannot track undo step - it seems they are buggy and this event is called in both Undo & Redo events. 
             //On the contrary, Redo events are never called :(
+        }
+#endif
+
+        void CreateCraftBackup(ShipConstruct data)
+        {
+                var shipName = GetShipName();
+                var currentTimeStamp = DateTime.Now.ToString("yy.MM.dd_HH.mm.ss.fff");
+                string path = "";
+
+                path = DirectoryServices.MakeNewHistoryDir(data.shipFacility);
+
+                Log.Info("Creating backup at " + path);
+                data.SaveShip().Save(Path.Combine(path, currentTimeStamp + ".craft"));
+                CheckForMaxBackups(path);
+        }
+
+        void CheckForMaxBackups(string path)
+        {
+            Log.Info("CheckForMaxBackups, path: " + path);
+
+            string[] files = Directory.GetFiles(path, "*.craft");
+            Array.Sort(files);
+
+            for (int i = 0; i < files.Length - HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().maxBackups; i++) 
+            {
+                File.Delete(files[i]);
+                string s = files[i].Substring(0, files[i].Length - 6) + ".crmgr";
+                File.Delete(s);
+                Log.Info("Deleting old version file: " + files[i] + ", " + s);
+
+            }
+        }
+
+        internal static string GetShipName()
+        {
+            return KSPUtil.SanitizeString(Localizer.Format(EditorLogic.fetch.ship.shipName), ' ', false);
         }
 
         public void destroy()
@@ -137,7 +218,7 @@ namespace KspCraftOrganizer
             GameEvents.onEditorStarted.Remove(this.processOnEditorStarted);
             GameEvents.onEditorLoad.Remove(this.processOnEditorLoaded);
             GameEvents.onEditorShipModified.Remove(this.onEditorShipModified);
-            GameEvents.onEditorUndo.Remove(this.onEditorUndo);
+            //GameEvents.onEditorUndo.Remove(this.onEditorUndo);
 
             EditorLogic.fetch.shipNameField.onValueChanged.RemoveListener(this.processOnShipNameChanged);
 
@@ -212,10 +293,10 @@ namespace KspCraftOrganizer
         }
 
         /**
-		 * This function must be called every time user has possibility to "see" that ship was saved. For example we 
-		 * use it when the user opens "load craft" window so we can detect if current ship was saved and if it was, the tags are
-		 * written to the disk as well.
-		 */
+         * This function must be called every time user has possibility to "see" that ship was saved. For example we 
+         * use it when the user opens "load craft" window so we can detect if current ship was saved and if it was, the tags are
+         * written to the disk as well.
+         */
         public void fireEventIfShipHasBeenSaved()
         {
 

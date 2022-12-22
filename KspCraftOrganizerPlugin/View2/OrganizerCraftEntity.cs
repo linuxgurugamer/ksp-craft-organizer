@@ -158,9 +158,16 @@ namespace KspCraftOrganizer
                     else
                         toRet += " (Stock) ";
                 }
-                if (name != nameFromFile && !isAutosaved)
+                if (craftFile.Contains(DirectoryServices.historyDirectory))
                 {
-                    toRet += " [" + nameFromFile + "]";
+                    toRet += " (Backup)";
+                }
+                else
+                {
+                    if (name != nameFromFile && !isAutosaved)
+                    {
+                        toRet += " [" + nameFromFile + "]";
+                    }
                 }
                 return toRet;
             }

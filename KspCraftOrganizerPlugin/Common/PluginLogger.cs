@@ -8,8 +8,8 @@ namespace KspNalCommon
     public static class PluginLogger
     {
         public static string pluginPrefix = "<undefined-plugin>";
-        private static bool debug_ = false;
-        private static bool whileReadingSettings = false;
+        //private static bool debug_ = false;
+        //private static bool whileReadingSettings = false;
 
         public static void logTrace(object toLog)
         {
@@ -23,6 +23,7 @@ namespace KspNalCommon
         {
             get
             {
+#if false
                 if (!whileReadingSettings && PluginCommons.instance != null)
                 {
                     try
@@ -37,20 +38,24 @@ namespace KspNalCommon
                     }
                 }
                 return debug_;
+#else
+                return HighLogic.CurrentGame.Parameters.CustomParams<KspCraftOrganizer.KSPCO_Settings>().debug;
+                //return PluginCommons.instance.isDebug();
+#endif
             }
         }
 
-        public static void logDebug(object toLog)
+        public static void logDebug(string toLog)
         {
             try
             {
                 if (debug)
                 {
-                    Debug.LogWarning("[" + pluginPrefix + "]" + toLog);
+                    Log.Warning( toLog);
                 }
                 else
                 {
-                    Debug.Log("[" + pluginPrefix + "]" + toLog);
+                    Log.Info(toLog);
                 }
             }
             catch (Exception ex)
@@ -62,7 +67,7 @@ namespace KspNalCommon
 
         internal static void logError(string toLog)
         {
-            Debug.LogError("[" + pluginPrefix + "]" + toLog);
+            Log.Error( toLog);
         }
 
 

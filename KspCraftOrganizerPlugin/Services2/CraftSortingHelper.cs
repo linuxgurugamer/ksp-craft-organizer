@@ -391,9 +391,9 @@ namespace KspCraftOrganizer
             crafts.Sort((c1, c2) =>
             {
                 if (c1.IsDir && !c2.IsDir)
-                    return -1;
+                    return OrganizerWindow.dirFirst?-1:1;
                 if (!c1.IsDir && c2.IsDir)
-                    return 1;
+                    return OrganizerWindow.dirFirst ? 1:-1;
                 if (c1.IsDir && c2.IsDir)
                     return CraftSortFunction.SORT_DIRS_BY_NAME.apply(c1, c2); ;
 

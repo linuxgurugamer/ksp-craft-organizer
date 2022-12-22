@@ -16,7 +16,7 @@ namespace KspCraftOrganizer
 
         private SettingsService settingsService = SettingsService.instance;
         private FileLocationService fileLocationService = FileLocationService.instance;
-        private OrganizerControllerCraftList craftList;
+        internal OrganizerControllerCraftList craftList;
         private OrganizerControllerFilter filter;
         public ManagementTagsGrouper managementTagsGroups;
         public OrganizerControllerStateManager stateManager { get; private set; }
@@ -85,30 +85,18 @@ namespace KspCraftOrganizer
         }
         public bool selectAllFiltered
         {
-            get
-            {
-                return craftList.selectAllFiltered;
-            }
+            get { return craftList.selectAllFiltered; }
         }
 
         public ICollection<OrganizerTagEntity> availableTags
         {
-            get
-            {
-                return filter.availableTags;
-            }
+            get { return filter.availableTags; }
         }
 
         public string craftNameFilter
         {
-            get
-            {
-                return filter.craftNameFilter;
-            }
-            set
-            {
-                filter.craftNameFilter = value;
-            }
+            get { return filter.craftNameFilter; }
+            set { filter.craftNameFilter = value; }
         }
 
         public void markFilterAsChanged()

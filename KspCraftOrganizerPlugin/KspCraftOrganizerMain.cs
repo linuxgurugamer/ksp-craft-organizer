@@ -30,23 +30,24 @@ namespace KspCraftOrganizer
 
         public string getPluginLogName()
         {
-            return "CraftOrganizer " + KspCraftOrganizerVersion.Version;
+            return "CraftOrganizer";
         }
 
         public bool isDebug()
         {
-            return SettingsService.instance.getPluginSettings().debug;
+            return HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().debug;
         }
 
         public bool replaceEditorLoadButton()
         {
-            return SettingsService.instance.getPluginSettings().replace_editor_load_button;
+            return HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().replaceEditorLoadButton;
         }
         public GUISkin kspSkin()
         {
             return IKspAlProvider.instance.kspSkin();
         }
     }
+
 
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class KspCraftOrganizerMain : MonoBehaviour2
@@ -121,7 +122,15 @@ namespace KspCraftOrganizer
 
             EditorListenerService.instance.start();
 
+            Log.Info("timedBackups: " + HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().timedBackups +
+                    ", saveBackupAfterChange: " + HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterChange);
+            if (HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().timedBackups &&
+                !HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().saveBackupAfterChange)
+                StartCoroutine(EditorListenerService.instance.TimedCraftBackup());
+
+
             GameEvents.onGameSceneLoadRequested.Add(OnSceneLoadRequested);
+
 
         }
 

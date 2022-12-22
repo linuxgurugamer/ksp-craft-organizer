@@ -59,6 +59,7 @@ namespace KspCraftOrganizer
         {
             return Directory.GetFiles(directory, getCraftFileFilter());
         }
+
         public List<string> getAllDirectoriesInDirectory(string directory)
         {
             var dirs = Directory.GetDirectories(directory);
@@ -207,7 +208,7 @@ namespace KspCraftOrganizer
             {
                 if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SPH, dirCnt)))
                 {
-                    return ksp.StockDirs()[dirCnt]+ "/@thumbs/SPH/" + Path.GetFileNameWithoutExtension(craftPath);
+                    return ksp.StockDirs()[dirCnt] + "/@thumbs/SPH/" + Path.GetFileNameWithoutExtension(craftPath);
                 }
                 if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.VAB, dirCnt)))
                 {

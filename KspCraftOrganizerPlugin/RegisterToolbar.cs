@@ -57,7 +57,7 @@ namespace KspCraftOrganizer
         void Start()
         {
             ToolbarControl.RegisterMod(KspCraftOrganizerMain.MODID, KspCraftOrganizerMain.MODNAME);
-            ToolbarControl.RegisterMod(KspCraftOrganizerMain.MODID, KspCraftOrganizerMain.MODTAGNAME);
+            ToolbarControl.RegisterMod(KspCraftOrganizerMain.MODTAGNAME, KspCraftOrganizerMain.MODTAGNAME);
         }
 
         bool Initted = false;

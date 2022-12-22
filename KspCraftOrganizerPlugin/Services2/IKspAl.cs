@@ -22,10 +22,15 @@ namespace KspCraftOrganizer
 
     public class PluginSettings
     {
+#if false
         public bool debug;
         public bool replace_editor_load_button;
         public bool showVersion;
         public bool allowStockVessels;
+
+        public bool autosaveOnChange;
+        public bool autosaveOnSave;
+#endif
         public bool onlyStockVessels = false; // Not saved, just here for convenience
         public ICollection<string> defaultAvailableTags { get; set; }
     }

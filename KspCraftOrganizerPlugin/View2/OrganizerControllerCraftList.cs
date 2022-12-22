@@ -87,18 +87,20 @@ namespace KspCraftOrganizer
         private OrganizerCraftEntity[] fetchAvailableCraftsAndDirectories(String craftDirectory, CraftType type, bool isStock)
         {
             PluginLogger.logDebug("fetching '" + type + "' crafts from disk from " + craftDirectory);
+            List<OrganizerCraftEntity> toRet = new List<OrganizerCraftEntity>();
 
             float startLoadingTime = Time.realtimeSinceStartup;
             string[] craftFiles = null;
             List<string> dirs = new List<string>();
             string dir = craftDirectory + DirectoryServices.curDir;
-            if (Directory.Exists(dir))
+
+
+            if (Directory.Exists(dir) )
             {
                 craftFiles = fileLocationService.getAllCraftFilesInDirectory(dir);
                 dirs = fileLocationService.getAllDirectoriesInDirectory(dir);
             }
 
-            List<OrganizerCraftEntity> toRet = new List<OrganizerCraftEntity>();
 
 
             if (DirectoryServices.dirStack.Count > 0 && !isStock)
@@ -159,8 +161,6 @@ namespace KspCraftOrganizer
 
     public class OrganizerControllerCraftList
     {
-
-
         public delegate bool CraftFilterPredicate(OrganizerCraftEntity craft, out bool shouldBeVisibleByDefault);
 
         private OrganizerCraftEntity[] cachedFilteredCrafts;
@@ -380,8 +380,8 @@ namespace KspCraftOrganizer
             {
                 craft.isSelectedForMove = false;
             }
-               selectedMoveCount = null;
-     }
+            selectedMoveCount = null;
+        }
 
         public List<OrganizerCraftEntity> GetCraftSelectedForMove()
         {

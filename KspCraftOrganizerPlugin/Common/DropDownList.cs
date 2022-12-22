@@ -219,6 +219,11 @@ namespace KspNalCommon
             }
         }
 
+        internal bool ItemChangedFlag
+        {
+            set {  this.itemChangedFlag = value; }
+            get { return this.itemChangedFlag; }
+        }
         internal bool getAndClearItemChangedByUserFlag()
         {
             bool toRet = itemChangedFlag;

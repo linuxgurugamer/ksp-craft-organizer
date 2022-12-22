@@ -625,6 +625,11 @@ namespace KspCraftOrganizer
             markPrimaryProfileDirty("removed craft sorting function");
         }
 
+        public void changeFolderPosition()
+        {
+            markPrimaryProfileDirty("changed folder display position");
+        }
+
         public IEnumerable<ICraftSortFunction> getCraftSortFunctions()
         {
             return craftSortingFunctions;

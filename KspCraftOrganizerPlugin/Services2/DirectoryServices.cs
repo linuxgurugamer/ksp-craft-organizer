@@ -40,7 +40,7 @@ namespace KspCraftOrganizer
             dirStack.Clear();
         }
 
-        static string FixSeparators(string oldDir)
+        static internal string FixSeparators(string oldDir)
         {
             var dir = oldDir.Replace('\\', '/');
             if (Path.DirectorySeparatorChar != '/')
@@ -58,6 +58,46 @@ namespace KspCraftOrganizer
                 Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + newDirName);
             }
         }
+
+        internal const string historyDirectory = "_Backup";
+
+#if false
+        static public string MakeNewHistoryDir(OrganizerController model)
+        {
+            IKspAl ksp = IKspAlProvider.instance;
+            string craftDirectory = fileLocationService.getCraftDirectoryForCraftType(ksp.getNameOfSaveFolder(), model.craftType);
+            var dir = FixSeparators(craftDirectory + Path.DirectorySeparatorChar + curDir + historyDirectory);
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            return dir;
+        }
+#endif
+
+        static public string MakeNewHistoryDir(EditorFacility facility)
+        {
+            IKspAl ksp = IKspAlProvider.instance;
+            CraftType type = CraftType.SUBASSEMBLY;
+
+            switch (facility)
+            {
+                case EditorFacility.None: type = CraftType.SUBASSEMBLY; break;
+                case EditorFacility.VAB: type = CraftType.VAB; break;
+                case EditorFacility.SPH: type = CraftType.SPH; break;
+            }
+
+            string craftDirectory = fileLocationService.getCraftDirectoryForCraftType(ksp.getNameOfSaveFolder(), type);
+            var dir = FixSeparators(craftDirectory + Path.DirectorySeparatorChar + curDir + EditorListenerService.GetShipName() + historyDirectory);
+
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            return dir;
+        }
+
 
         static public int GetCountOfFilesInDir(OrganizerController model, string dirName)
         {

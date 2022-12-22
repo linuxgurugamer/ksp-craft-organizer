@@ -24,6 +24,9 @@ namespace KspCraftOrganizer
 
         private Vector2 tagScrollPosition;
         public bool showManageTagsToolbar { get; set; }
+        public static bool dirFirst = true;
+        public static bool showHistoryFolders = false;
+
         public string selectedCraftName = "";
         public bool dirSelected = false;
         public bool selectAllFiltered;
@@ -223,6 +226,27 @@ namespace KspCraftOrganizer
                             }
                             sortingModeDropDown.onGui(this, showManageTagsToolbar ? 100 : 200);
                         }
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.FlexibleSpace();
+                            bool newDirFirst = GUILayout.Toggle(dirFirst, "List folders first");
+                            if (newDirFirst != dirFirst)
+                            {
+                                model.markFilterAsChanged();
+                                dirFirst = newDirFirst;
+                            }
+                            GUILayout.FlexibleSpace();
+
+                            // showHistoryFolders
+                            bool newShowHistoryFolders = GUILayout.Toggle(showHistoryFolders, "Show history folders");
+                            if (newShowHistoryFolders != showHistoryFolders)
+                            {
+                                model.markFilterAsChanged();
+                                showHistoryFolders = newShowHistoryFolders;
+                            }
+                            GUILayout.FlexibleSpace();
+
+                        }
                         if (model.filteredCrafts.Length > 50)
                         {
                             GUILayout.Label(
@@ -372,6 +396,7 @@ namespace KspCraftOrganizer
             }
         }
 
+
         private void drawFilterColumn()
         {
             using (new GUILayout.VerticalScope(GUILayout.Width(FILTER_TOOLBAR_WIDTH)))
@@ -380,14 +405,14 @@ namespace KspCraftOrganizer
                 {
                     var width = FILTER_TOOLBAR_WIDTH - 10 - skin.verticalScrollbar.CalcScreenSize(skin.verticalScrollbar.CalcSize(new GUIContent(""))).x;
 
-                    bool oAllowStockVessels = SettingsService.instance.getPluginSettings().allowStockVessels;
+                    bool oAllowStockVessels = HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels;
                     bool oOnlyStockVessels = SettingsService.instance.getPluginSettings().onlyStockVessels;
                     GUI.enabled = !SettingsService.instance.getPluginSettings().onlyStockVessels;
-                    SettingsService.instance.getPluginSettings().allowStockVessels = GUILayout.Toggle(SettingsService.instance.getPluginSettings().allowStockVessels, "Include stock craft");
-                    GUI.enabled = SettingsService.instance.getPluginSettings().allowStockVessels;
+                    HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels = GUILayout.Toggle(HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels, "Include stock craft");
+                    GUI.enabled = HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels;
                     SettingsService.instance.getPluginSettings().onlyStockVessels = GUILayout.Toggle(SettingsService.instance.getPluginSettings().onlyStockVessels, "Only stock craft");
                     GUI.enabled = true;
-                    if (oAllowStockVessels != SettingsService.instance.getPluginSettings().allowStockVessels ||
+                    if (oAllowStockVessels != HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels ||
                         oOnlyStockVessels != SettingsService.instance.getPluginSettings().onlyStockVessels)
                     {
                         this.model.ClearCraftList();
@@ -399,6 +424,7 @@ namespace KspCraftOrganizer
                     using (new GUILayout.HorizontalScope(GUILayout.ExpandWidth(true)))
                     {
                         model.craftNameFilter = GUILayout.TextField(model.craftNameFilter, GUILayout.Width(width));
+                        
                         if (justAfterWindowDisplay)
                         {
                             GUI.FocusControl(TEXT_FILTER_CONTROL_NAME);
