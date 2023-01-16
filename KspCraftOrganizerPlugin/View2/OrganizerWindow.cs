@@ -347,7 +347,7 @@ namespace KspCraftOrganizer
                 }
 
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Auto Tag"))
+                if (GUILayout.Button("Auto Tag (add stock/crewed/unmanned)"))
                 {
                     DoAutoTag();
                 }
@@ -376,6 +376,7 @@ namespace KspCraftOrganizer
             }
             ScreenMessages.PostScreenMessage("AutoTag completed", 5, ScreenMessageStyle.UPPER_CENTER);
         }
+
         void drawCraftsFilteredWarning()
         {
             bool displayCraftsFilteredWarning = model.craftsAreFiltered;

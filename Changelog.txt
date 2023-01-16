@@ -46,3 +46,6 @@ Changelog
 	Made buttons for folder selection smaller
 	Added toggle to list folders first or last
 	Added toggle to show or hide history folders
+
+1.7.2.1
+	Added text to AutoTag button

@@ -1,6 +1,4 @@
 
-
-
 Add Saving your craft file after every change of the craft or periodically
 	on save
 	on change
