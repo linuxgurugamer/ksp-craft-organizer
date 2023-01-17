@@ -49,3 +49,6 @@ Changelog
 
 1.7.2.1
 	Added text to AutoTag button
+
+1.7.2.2
+	Fixed the "Include Stock" toggle to actually work to not show stock craft when it's not selected

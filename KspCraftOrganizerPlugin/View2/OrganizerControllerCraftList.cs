@@ -45,7 +45,8 @@ namespace KspCraftOrganizer
             if (!SettingsService.instance.getPluginSettings().onlyStockVessels)
                 toRetList.AddRange(fetchAvailableCraftsAndDirectories(craftDirectory, type, false));
 
-            if (ksp.isShowStockCrafts() && parent.thisIsPrimarySave)
+            if (ksp.isShowStockCrafts() && parent.thisIsPrimarySave && 
+                HighLogic.CurrentGame.Parameters.CustomParams<KSPCO_Settings>().allowStockVessels)
             {
                 for (int dirCnt = 0; dirCnt < ksp.StockDirs().Length; dirCnt++)
                 {
