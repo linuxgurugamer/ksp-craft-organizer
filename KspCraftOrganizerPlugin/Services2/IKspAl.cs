@@ -221,7 +221,7 @@ namespace KspCraftOrganizer
 
         string getApplicationRootPath();
 
-        Texture2D getThumbnail(string url);
+        Texture2D getThumbnail(string url, string craftFile);
 
         string getCurrentCraftName();
 

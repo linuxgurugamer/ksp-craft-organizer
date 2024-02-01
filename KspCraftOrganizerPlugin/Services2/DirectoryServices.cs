@@ -43,6 +43,11 @@ namespace KspCraftOrganizer
         static internal string FixSeparators(string oldDir)
         {
             var dir = oldDir.Replace('\\', '/');
+            while (dir.IndexOf("//") >= 0)
+            {
+                int i = dir.IndexOf("//");
+                dir = dir.Substring(0, i) + dir.Substring(i + 1);
+            }
             if (Path.DirectorySeparatorChar != '/')
                 dir = dir.Replace('/', Path.DirectorySeparatorChar);
             return dir;

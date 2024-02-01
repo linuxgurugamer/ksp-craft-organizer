@@ -157,7 +157,8 @@ namespace KspCraftOrganizer
 
         internal Texture2D getThumbnailForFile(string craftFile)
         {
-            return ksp.getThumbnail(fileLocationService.getThumbUrl(craftFile));
+            Log.Info("OrganizerController.cs.getThumbnailForFile, craftFile: " + craftFile);
+            return ksp.getThumbnail(fileLocationService.getThumbUrl(craftFile), craftFile);
         }
 
         public bool doNotWriteTagSettingsToDisk { get; set; }
@@ -370,12 +371,12 @@ namespace KspCraftOrganizer
 
         public void mergeCraftToWorkspace(OrganizerCraftEntity craft)
         {
-            ksp.mergeCraftToWorkspace(craft.craftFile);
+            ksp.mergeCraftToWorkspace(DirectoryServices.FixSeparators(craft.craftFile));
         }
 
         public void loadCraftToWorkspace(OrganizerCraftEntity craft)
         {
-            ksp.loadCraftToWorkspace(craft.craftFile);
+            ksp.loadCraftToWorkspace(DirectoryServices.FixSeparators( craft.craftFile));
         }
 
         public void writeAllDirtySettings()

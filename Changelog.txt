@@ -52,3 +52,6 @@ Changelog
 
 1.7.2.2
 	Fixed the "Include Stock" toggle to actually work to not show stock craft when it's not selected
+
+1.7.2.3
+	Fixed icons not being generated after loading or saving vessels

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using KspNalCommon;
 using UniLinq;
 using static KspCraftOrganizer.RegisterToolbar;
+using System.Reflection;
 
 
 namespace KspCraftOrganizer
@@ -123,14 +124,14 @@ namespace KspCraftOrganizer
         {
             if (KSPUtil.ApplicationRootPath == null)
                 return "";
-            return KSPUtil.ApplicationRootPath;
+            return DirectoryServices.FixSeparators(KSPUtil.ApplicationRootPath);
         }
 
         public string getNameOfSaveFolder()
         {
             if (HighLogic.SaveFolder == null)
                 return "";
-            return HighLogic.SaveFolder;
+            return DirectoryServices.FixSeparators( HighLogic.SaveFolder);
         }
 
         private string[] stockDirs =
@@ -148,6 +149,8 @@ namespace KspCraftOrganizer
                     s.Remove(s[x]);
             s.Add("Ships");
             stockDirs = s.ToArray();
+            for (int i = 0; i < stockDirs.Length; i++)
+                stockDirs[i] =  DirectoryServices.FixSeparators(stockDirs[i]);
         }
         public string[] StockDirs()
         {
@@ -799,8 +802,11 @@ namespace KspCraftOrganizer
             KSPBasics.instance.unlockEditor();
         }
 
-        public Texture2D getThumbnail(string url)
+        public static Texture2D placeholderImage = null;
+
+        public Texture2D getThumbnail(string url, string craftFile)
         {
+            Log.Info("KspAllmpl.getThumbnail, url: " + url);
             return ShipConstruction.GetThumbnail(url);
         }
 
@@ -818,10 +824,10 @@ namespace KspCraftOrganizer
 
         public void saveCurrentCraft()
         {
-            string savePath = ShipConstruction.GetSavePath(EditorLogic.fetch.ship.shipName);
-            PluginLogger.logDebug("Saving current ship to " + savePath);
+            string savePath = DirectoryServices.FixSeparators(ShipConstruction.GetSavePath(EditorLogic.fetch.ship.shipName));
+            Log.Info("Saving current ship to " + savePath);
             EditorLogic.fetch.ship.SaveShip().Save(savePath);
-            PluginLogger.logDebug("Done Saving current shipt");
+            Log.Info("Done Saving current ship");
         }
 
         public PluginSettings getPluginSettings(string fileName)

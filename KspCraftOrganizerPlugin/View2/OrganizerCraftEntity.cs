@@ -399,8 +399,10 @@ namespace KspCraftOrganizer
             {
                 if (thumbTextureCache == null)
                 {
+                    Log.Info("OrganizerCraftEntity.thumbTexture, thumbTextureCache is  null");
                     thumbTextureCache = service.getThumbnailForFile(craftFile);
                 }
+
                 return thumbTextureCache;
             }
             set

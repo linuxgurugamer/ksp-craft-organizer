@@ -51,7 +51,7 @@ namespace KspCraftOrganizer
         private string originalShipRealFileOrNull;
         private bool newEditor;
         private DateTime lastSaveDate;
-        private FileLocationService fileLocattion = FileLocationService.instance;
+        private FileLocationService fileLocation = FileLocationService.instance;
 
         public delegate void OnShipSaved(string fileName, bool craftSavedToNewFile);
         public delegate void OnShipLoaded(string fileName);
@@ -106,10 +106,10 @@ namespace KspCraftOrganizer
                 _lastShipNameInEditor = EditorLogic.fetch.ship.shipName;
                 newEditor = EditorLogic.fetch.ship.Count == 0;
                 string file = EditorDriver.filePathToLoad;//this path may be invalid when editor starts
-                if (file != "" && Path.GetFullPath(fileLocattion.getCraftSaveFilePathForShipName(_lastSavedShipName)) != Path.GetFullPath(file))
+                if (file != "" && Path.GetFullPath(fileLocation.getCraftSaveFilePathForShipName(_lastSavedShipName)) != Path.GetFullPath(file))
                 {
                     PluginLogger.logDebug("Name of the ship is '" + _lastSavedShipName + "' but KSP claims it is loaded from '" + file + "' which is probably a bug. Assuming that file was loaded from autosave.");
-                    file = fileLocattion.getAutoSaveShipPath();//this path may be invalid when we use dynamic plugin reload but it is relevant only during development so lets stick to it
+                    file = fileLocation.getAutoSaveShipPath();//this path may be invalid when we use dynamic plugin reload but it is relevant only during development so lets stick to it
                 }
                 if (newEditor)
                 {
@@ -229,7 +229,7 @@ namespace KspCraftOrganizer
             fireEventIfShipHasBeenSaved();
             if (onShipSaved != null)
             {
-                onShipSaved(fileLocattion.getAutoSaveShipPath(), true);
+                onShipSaved(fileLocation.getAutoSaveShipPath(), true);
             }
         }
 
@@ -255,7 +255,7 @@ namespace KspCraftOrganizer
         {
             if (lt == CraftBrowserDialog.LoadType.Normal)
             {
-                PluginLogger.logDebug("processOnEditorLoaded, file: " + EditorDriver.filePathToLoad);
+                PluginLogger.logDebug("processOnEditorLoaded, file: " + EditorDriver.filePathToLoad + ", c.shipName: " + c.shipName);
                 string file = EditorDriver.filePathToLoad;
                 if (!newEditor)
                 {
@@ -280,7 +280,7 @@ namespace KspCraftOrganizer
 
         private void updateLastSaveDate()
         {
-            string fileSavePath = fileLocattion.getCraftSaveFilePathForShipName(lastShipNameInEditor);
+            string fileSavePath = fileLocation.getCraftSaveFilePathForShipName(lastShipNameInEditor);
             if (File.Exists(fileSavePath))
             {
                 lastSaveDate = File.GetLastWriteTime(fileSavePath);
@@ -300,7 +300,7 @@ namespace KspCraftOrganizer
         public void fireEventIfShipHasBeenSaved()
         {
 
-            string fileSavePath = fileLocattion.getCraftSaveFilePathForShipName(lastShipNameInEditor);
+            string fileSavePath = fileLocation.getCraftSaveFilePathForShipName(lastShipNameInEditor);
             if (File.Exists(fileSavePath))
             {
                 DateTime newWriteTime = File.GetLastWriteTime(fileSavePath);
@@ -353,7 +353,7 @@ namespace KspCraftOrganizer
 
         public bool canAutoSaveSomethingToDisk()
         {
-            return !newEditor && lastShipNameInEditor == _lastSavedShipName && File.Exists(originalShipFile) && fileLocattion.getCraftSaveFilePathForCurrentShip() == currentShipFile;
+            return !newEditor && lastShipNameInEditor == _lastSavedShipName && File.Exists(originalShipFile) && fileLocation.getCraftSaveFilePathForCurrentShip() == currentShipFile;
         }
 
         public string lastShipNameInEditor { get { return _lastShipNameInEditor; } }
@@ -370,7 +370,7 @@ namespace KspCraftOrganizer
                 }
                 else
                 {
-                    return fileLocattion.getCraftSaveFilePathForShipName(lastSavedShipName);
+                    return fileLocation.getCraftSaveFilePathForShipName(lastSavedShipName);
                 }
             }
         }
@@ -386,7 +386,7 @@ namespace KspCraftOrganizer
                 }
                 else
                 {
-                    return fileLocattion.getCraftSaveFilePathForShipName(lastShipNameInEditor);
+                    return fileLocation.getCraftSaveFilePathForShipName(lastShipNameInEditor);
                 }
             }
         }

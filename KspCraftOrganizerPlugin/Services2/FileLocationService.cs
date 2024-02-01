@@ -34,18 +34,19 @@ namespace KspCraftOrganizer
 
         public string getCraftSaveFilePathForShipName(string shipName)
         {
-            return getCraftFilePathFromPathAndCraftName(getCraftSaveDirectory(), shipName);
+            Log.Info("getCraftSaveFilePathForShipName: " + DirectoryServices.FixSeparators( getCraftFilePathFromPathAndCraftName(getCraftSaveDirectory(), shipName)));
+            return DirectoryServices.FixSeparators(getCraftFilePathFromPathAndCraftName(getCraftSaveDirectory(), shipName));
         }
 
         private string getCraftFilePathFromPathAndCraftName(string path, string shipName)
         {
             //we do not use shipName directly because it may contain special characters. We use translated file name
             // - the translation is done by KSP itself.
-            String kraftPathProvidedByKsp = ksp.getSavePathForCraftName(shipName);
+            String kraftPathProvidedByKsp = DirectoryServices.FixSeparators(ksp.getSavePathForCraftName(shipName));
             String fileName = Path.GetFileName(kraftPathProvidedByKsp);
-            PluginLogger.logDebug("getCraftFilePathFromPathAndCraftName. Craft name: " + shipName + ", file path provided by KSP: " + kraftPathProvidedByKsp + ", final file name: " + fileName);
-            String finalPath = Path.Combine(path, fileName);
-            PluginLogger.logDebug("getCraftFilePathFromPathAndCraftName. Final path: " + finalPath);
+            //PluginLogger.logDebug("getCraftFilePathFromPathAndCraftName. Craft name: " + shipName + ", file path provided by KSP: " + kraftPathProvidedByKsp + ", final file name: " + fileName);
+            String finalPath = DirectoryServices.FixSeparators(Path.Combine(path, fileName));
+            //PluginLogger.logDebug("getCraftFilePathFromPathAndCraftName. Final path: " + finalPath);
             return finalPath;
         }
 
@@ -203,12 +204,12 @@ namespace KspCraftOrganizer
 
         public string getThumbUrl(string craftPath)
         {
-            PluginLogger.logDebug(String.Format("getThumbUrl: craftPath {0}", craftPath));
+            Log.Info(String.Format("getThumbUrl: craftPath {0}", craftPath));
             for (int dirCnt = 0; dirCnt < ksp.StockDirs().Length; dirCnt++)
             {
                 if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.SPH, dirCnt)))
                 {
-                    return ksp.StockDirs()[dirCnt] + "/@thumbs/SPH/" + Path.GetFileNameWithoutExtension(craftPath);
+                    return ksp.StockDirs()[dirCnt] + "/@thumbs/SPH/" +Path.GetFileNameWithoutExtension(craftPath);
                 }
                 if (isPathInside(craftPath, getStockCraftDirectoryForCraftType(CraftType.VAB, dirCnt)))
                 {
@@ -219,6 +220,7 @@ namespace KspCraftOrganizer
                     return "/Subassemblies/@thumbs/" + Path.GetFileNameWithoutExtension(craftPath);
                 }
             }
+            Log.Info("Not in stock directories");
             string saveName = extractSaveNameFromCraftPath(craftPath);
             if (isPathInside(craftPath, getCraftDirectoryForCraftType(saveName, CraftType.SPH)))
             {
