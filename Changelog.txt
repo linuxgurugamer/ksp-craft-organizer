@@ -55,3 +55,6 @@ Changelog
 
 1.7.2.3
 	Fixed icons not being generated after loading or saving vessels
+
+1.7.2.4
+	Updated version file to use github for new version info
