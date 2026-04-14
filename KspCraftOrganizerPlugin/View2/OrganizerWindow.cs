@@ -102,7 +102,7 @@ namespace KspCraftOrganizer
 
         protected override float getWindowWidthOnScreen(Rect pos)
         {
-            return Math.Min(Math.Min(Math.Max(Screen.width * 9 / 10, MIN_WINDOW_WIDTH), Screen.height * 1.5f), 800 * guiRawScale);
+            return Math.Max(Math.Min(Math.Max(Screen.width * 9 / 10, MIN_WINDOW_WIDTH), Screen.height * 1.5f), 800 * guiRawScale);
         }
 
         override protected float getMinWindowInnerWidth(Rect pos)

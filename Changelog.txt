@@ -1,5 +1,5 @@
 Changelog
-
+	
 1.7.0 
 	Adoption by Linuxgurugamer
 	Added ability to read/load from the Subassemblies folder
@@ -58,3 +58,7 @@ Changelog
 
 1.7.2.4
 	Updated version file to use github for new version info
+
+1.7.2.5
+	Thanks to github user @thghca for pointing out this error and fix:
+		Fixed window width on different size windows
